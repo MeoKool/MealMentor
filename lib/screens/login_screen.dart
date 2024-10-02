@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/homepage_screen.dart';
 import 'profile_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -80,7 +81,7 @@ class LoginScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              ProfileScreen()), // Navigate to ProfileScreen
+                              HomePage()), // Navigate to ProfileScreen
                     );
                   },
                   style: ElevatedButton.styleFrom(

@@ -9,39 +9,26 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF9DC08B), // Màu nền xanh lá nhạt
       body: Column(
         children: [
-          // Phần trên cùng với hình ảnh và logo
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: double.infinity,
-                height: 220,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                        'images/headerImage.png'), // Hình ảnh phía trên
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 160,
-                left: MediaQuery.of(context).size.width / 2 - 50,
-                child: Column(
-                  children: [
-                    Image.asset(
-                      'images/logoApp.png', // Logo của bạn
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.contain,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          // Logo Meal Mentor
+          const SizedBox(height: 100), // Khoảng cách phía trên
+          Center(
+            child: Image.asset(
+              'images/logoApp.png', // Logo của bạn
+              width: 100,
+              height: 100,
+              fit: BoxFit.contain,
+            ),
           ),
-          const SizedBox(
-              height: 80), // Khoảng cách để logo và danh sách không bị trùng
+          const SizedBox(height: 20),
+          const Text(
+            'Quản lí tài khoản',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 40), // Khoảng cách giữa logo và danh sách
           // Phần danh sách các mục
           Expanded(
             child: ListView(
