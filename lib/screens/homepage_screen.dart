@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/profile_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -169,7 +170,12 @@ class HomePage extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.home),
                 color: Colors.black,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
+                },
               ),
               IconButton(
                 icon: const Icon(Icons.search),
@@ -185,7 +191,13 @@ class HomePage extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.settings),
                 color: Colors.black,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ProfileScreen()),
+                  );
+                },
               ),
             ],
           ),

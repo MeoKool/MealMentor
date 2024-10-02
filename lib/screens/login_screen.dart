@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/changePassword.dart';
 import 'package:mealmentor/screens/homepage_screen.dart';
 import 'profile_screen.dart';
 
@@ -322,6 +323,11 @@ class LoginScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               // Xử lý đặt lại mật khẩu
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ChangePasswordScreen()),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor:

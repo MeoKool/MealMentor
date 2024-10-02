@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/homepage_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -85,6 +86,10 @@ class ProfileScreen extends StatelessWidget {
                 color: Colors.black,
                 onPressed: () {
                   // Chuyển đến trang Home
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomePage()),
+                  );
                 },
               ),
               IconButton(
