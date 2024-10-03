@@ -14,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 100), // Khoảng cách phía trên
           Center(
             child: Image.asset(
-              'images/logoApp.png', // Logo của bạn
+              'assets/images/logoApp.png', // Logo của bạn
               width: 100,
               height: 100,
               fit: BoxFit.contain,

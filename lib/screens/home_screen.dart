@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 // Hình logo Meal Mentor
                 Image.asset(
-                  'images/logoApp.png',
+                  'assets/images/logoApp.png',
                   width: 400,
                   height: 500,
                   fit: BoxFit.contain,

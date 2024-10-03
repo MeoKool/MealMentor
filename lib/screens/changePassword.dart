@@ -15,7 +15,7 @@ class ChangePasswordScreen extends StatelessWidget {
           children: [
             // Logo Meal Mentor
             Image.asset(
-              'images/logoApp.png',
+              'assets/images/logoApp.png',
               width: 150,
               height: 150,
               fit: BoxFit.contain,
