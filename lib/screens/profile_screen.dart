@@ -71,64 +71,6 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF609966), // Màu của FAB ở giữa
-        child: const Icon(Icons.restaurant_menu),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Container(
-          height: 60,
-          decoration: const BoxDecoration(
-            color: Color(0xFF609966), // Màu của BottomBar
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.home),
-                color: Colors.black,
-                onPressed: () {
-                  // Chuyển đến trang Home
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.search),
-                color: Colors.black,
-                onPressed: () {
-                  // Chuyển đến trang Tìm kiếm
-                },
-              ),
-              const SizedBox(width: 48), // Khoảng trống cho FAB ở giữa
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                color: Colors.black,
-                onPressed: () {
-                  // Chuyển đến trang thông báo
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings),
-                color: Colors.black,
-                onPressed: () {
-                  // Chuyển đến trang cài đặt
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
