@@ -39,9 +39,9 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 Image.asset(
-                  'images/logoApp.png', // Logo của bạn
-                  width: 60,
-                  height: 60,
+                  'assets/images/logoApp.png', // Logo của bạn
+                  width: 80,
+                  height: 80,
                 ),
               ],
             ),
@@ -57,7 +57,7 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             SizedBox(
-              height: 150, // Chiều cao của danh sách công thức
+              height: 180, // Chiều cao của danh sách công thức
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -65,14 +65,14 @@ class HomePage extends StatelessWidget {
                     "Mì hải sản chay",
                     "James Spader",
                     "20 Min",
-                    'images/recipe1.png',
+                    'assets/images/recipe1.png',
                   ),
                   const SizedBox(width: 10),
                   _buildRecipeCard(
                     "Bún chay",
                     "Olivia Ryan",
                     "20 Min",
-                    'images/recipe2.png',
+                    'assets/images/recipe2.png',
                   ),
                 ],
               ),
@@ -132,13 +132,13 @@ class HomePage extends StatelessWidget {
                   "Salad Taco chay",
                   "120 Kcal",
                   "20 Min",
-                  'images/popular1.png',
+                  'assets/images/recipe1.png',
                 ),
                 _buildPopularMealCard(
                   "Bánh Pancake Nhật chay",
                   "64 Kcal",
                   "12 Min",
-                  'images/popular2.png',
+                  'assets/images/recipe2.png',
                 ),
               ],
             ),
@@ -146,63 +146,63 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color(0xFF609966), // Màu của FAB
-        child: const Icon(Icons.restaurant_menu),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Container(
-          height: 60,
-          decoration: const BoxDecoration(
-            color: Color(0xFF609966), // Màu của BottomBar
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.home),
-                color: Colors.black,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                  );
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.search),
-                color: Colors.black,
-                onPressed: () {},
-              ),
-              const SizedBox(width: 48), // Khoảng trống cho FAB ở giữa
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                color: Colors.black,
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings),
-                color: Colors.black,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProfileScreen()),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {},
+      //   backgroundColor: const Color(0xFF609966), // Màu của FAB
+      //   child: const Icon(Icons.restaurant_menu),
+      // ),
+      // bottomNavigationBar: BottomAppBar(
+      //   shape: const CircularNotchedRectangle(),
+      //   notchMargin: 8.0,
+      //   child: Container(
+      //     height: 60,
+      //     decoration: const BoxDecoration(
+      //       color: Color(0xFF609966), // Màu của BottomBar
+      //       borderRadius: BorderRadius.only(
+      //         topLeft: Radius.circular(20),
+      //         topRight: Radius.circular(20),
+      //       ),
+      //     ),
+      //     child: Row(
+      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+      //       children: <Widget>[
+      //         IconButton(
+      //           icon: const Icon(Icons.home),
+      //           color: Colors.black,
+      //           onPressed: () {
+      //             Navigator.push(
+      //               context,
+      //               MaterialPageRoute(builder: (context) => const HomePage()),
+      //             );
+      //           },
+      //         ),
+      //         IconButton(
+      //           icon: const Icon(Icons.search),
+      //           color: Colors.black,
+      //           onPressed: () {},
+      //         ),
+      //         const SizedBox(width: 48), // Khoảng trống cho FAB ở giữa
+      //         IconButton(
+      //           icon: const Icon(Icons.notifications),
+      //           color: Colors.black,
+      //           onPressed: () {},
+      //         ),
+      //         IconButton(
+      //           icon: const Icon(Icons.settings),
+      //           color: Colors.black,
+      //           onPressed: () {
+      //             Navigator.push(
+      //               context,
+      //               MaterialPageRoute(
+      //                   builder: (context) => const ProfileScreen()),
+      //             );
+      //           },
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
     );
   }
 

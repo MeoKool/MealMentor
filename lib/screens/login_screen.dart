@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/changePassword.dart';
 import 'package:mealmentor/screens/homepage_screen.dart';
+import 'package:mealmentor/screens/navigation_menu.dart';
 import 'profile_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -21,7 +22,7 @@ class LoginScreen extends StatelessWidget {
               children: [
                 // Hình logo Meal Mentor
                 Image.asset(
-                  'images/logoApp.png', // Thay bằng hình ảnh thực tế của bạn
+                  'assets/images/logoApp.png', // Thay bằng hình ảnh thực tế của bạn
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -82,7 +83,7 @@ class LoginScreen extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                              HomePage()), // Navigate to ProfileScreen
+                              NavigationMenu()), // Navigate to ProfileScreen
                     );
                   },
                   style: ElevatedButton.styleFrom(
