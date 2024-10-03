@@ -338,7 +338,7 @@ class LoginScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 80),
             ),
             child: const Text(
-              'Đặt lại mật khẩu',
+              'Xác nhận',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,

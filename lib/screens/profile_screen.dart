@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/homepage_screen.dart';
+import 'package:mealmentor/screens/subscribe.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -7,6 +8,9 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
       backgroundColor: const Color(0xFF9DC08B), // Màu nền xanh lá nhạt
       body: Column(
         children: [
@@ -29,31 +33,38 @@ class ProfileScreen extends StatelessWidget {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 40), // Khoảng cách giữa logo và danh sách
+          const SizedBox(height: 40),
           // Phần danh sách các mục
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: const [
-                ListTile(
+              children: [
+                const ListTile(
                   leading: Icon(Icons.person_outline),
                   title: Text('Thông tin cá nhân'),
                 ),
-                ListTile(
+                const ListTile(
                   leading: Icon(Icons.contact_mail_outlined),
                   title: Text('Liên hệ'),
                 ),
-                ListTile(
+                const ListTile(
                   leading: Icon(Icons.menu_book_outlined),
                   title: Text('Thực đơn'),
                 ),
-                ListTile(
+                const ListTile(
                   leading: Icon(Icons.favorite_outline),
                   title: Text('Yêu thích'),
                 ),
                 ListTile(
-                  leading: Icon(Icons.subscriptions_outlined),
-                  title: Text('Gói đăng ký'),
+                  leading: const Icon(Icons.subscriptions_outlined),
+                  title: const Text('Gói đăng ký'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const SubscriptionScreen()),
+                    );
+                  },
                 ),
               ],
             ),
