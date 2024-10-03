@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/homepage_screen.dart';
+import 'package:mealmentor/screens/profile_screen.dart';
 import 'package:mealmentor/screens/search_screen.dart';
 import 'package:mealmentor/screens/notification_screen.dart';
 import 'package:mealmentor/screens/setting_screen.dart';
@@ -49,14 +50,20 @@ class _NavigationMenuState extends State<NavigationMenu> {
             children: <Widget>[
               // Home Button
               IconButton(
-                icon: Icon(Icons.home, color: _selectedIndex == 0 ? Colors.white : Color(0xFF40513B), size: 35),
+                icon: Icon(Icons.home,
+                    color:
+                        _selectedIndex == 0 ? Colors.white : Color(0xFF40513B),
+                    size: 35),
                 onPressed: () {
                   _onItemTapped(0);
                 },
               ),
               // Search Button
               IconButton(
-                icon: Icon(Icons.search, color: _selectedIndex == 1 ? Colors.white : Color(0xFF40513B), size: 35),
+                icon: Icon(Icons.search,
+                    color:
+                        _selectedIndex == 1 ? Colors.white : Color(0xFF40513B),
+                    size: 35),
                 onPressed: () {
                   _onItemTapped(1);
                 },
@@ -65,14 +72,20 @@ class _NavigationMenuState extends State<NavigationMenu> {
               SizedBox(width: 50),
               // Notification Button
               IconButton(
-                icon: Icon(Icons.notifications, color: _selectedIndex == 3 ? Colors.white : Color(0xFF40513B), size: 35),
+                icon: Icon(Icons.notifications,
+                    color:
+                        _selectedIndex == 3 ? Colors.white : Color(0xFF40513B),
+                    size: 35),
                 onPressed: () {
                   _onItemTapped(3);
                 },
               ),
               // Settings Button
               IconButton(
-                icon: Icon(Icons.settings, color: _selectedIndex == 4 ? Colors.white : Color(0xFF40513B), size: 35),
+                icon: Icon(Icons.settings,
+                    color:
+                        _selectedIndex == 4 ? Colors.white : Color(0xFF40513B),
+                    size: 35),
                 onPressed: () {
                   _onItemTapped(4);
                 },
@@ -104,7 +117,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 3:
         return NotificationScreen(); // Notification Page
       case 4:
-        return SettingScreen(); // Settings Page
+        return ProfileScreen(); // Settings Page
       default:
         return HomePage(); // Default to Home Page
     }
