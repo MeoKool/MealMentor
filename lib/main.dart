@@ -10,6 +10,7 @@ void main() {
       builder: (context) => FlutterApp(), // Wrap your app
     ),
   );
+
 }
 
 class FlutterApp extends StatelessWidget {

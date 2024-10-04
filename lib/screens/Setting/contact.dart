@@ -14,7 +14,7 @@ class ContactScreen extends StatelessWidget {
           children: [
             // Logo Meal Mentor
             Image.asset(
-              'images/logoApp.png', // Thay bằng đường dẫn hình ảnh logo của bạn
+              'assets/images/logoApp.png', // Thay bằng đường dẫn hình ảnh logo của bạn
               width: 150,
               height: 150,
               fit: BoxFit.contain,
