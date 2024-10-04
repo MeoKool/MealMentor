@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/changePassword.dart';
 import 'package:mealmentor/screens/homepage_screen.dart';
 import 'package:mealmentor/screens/navigation_menu.dart';
-import 'profile_screen.dart';
+import 'Setting/profile_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -81,9 +81,7 @@ class LoginScreen extends StatelessWidget {
                     // Xử lý đăng nhập
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              NavigationMenu()), // Navigate to ProfileScreen
+                      MaterialPageRoute(builder: (context) => NavigationMenu()),
                     );
                   },
                   style: ElevatedButton.styleFrom(

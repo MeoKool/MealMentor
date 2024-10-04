@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mealmentor/screens/profile_screen.dart';
+import 'package:mealmentor/screens/Setting/profile_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
