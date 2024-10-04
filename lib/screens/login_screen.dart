@@ -13,7 +13,6 @@ class LoginScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF9DC08B), // Màu nền xanh lá
       body: Stack(
         children: [
-          // Logo và form đăng nhập
           Positioned(
             top: 100,
             left: 50,
@@ -28,44 +27,25 @@ class LoginScreen extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 20),
+
                 // Form đăng nhập
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Tên đăng nhập:',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
+                _buildTextField("Tên đăng nhập:", false),
                 const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Mật khẩu:',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  obscureText: true,
-                ),
+                _buildTextField("Mật khẩu:", true),
                 const SizedBox(height: 10),
+
                 // Text quên mật khẩu
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
                     onTap: () {
-                      // Khi nhấn vào "Bạn quên mật khẩu", mở BottomSheet
                       showModalBottomSheet(
                         context: context,
-                        isScrollControlled:
-                            true, // Để cho phép full-height scroll
+                        isScrollControlled: true,
                         builder: (BuildContext context) {
                           return _buildForgotPasswordSheet(context);
                         },
-                        backgroundColor: Colors.transparent, // Nền trong suốt
+                        backgroundColor: Colors.transparent,
                       );
                     },
                     child: const Text(
@@ -75,22 +55,25 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
+
                 // Nút "Đăng nhập"
                 ElevatedButton(
                   onPressed: () {
-                    // Xử lý đăng nhập
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => NavigationMenu()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF40513B), // Màu xanh đậm cho nút
+                    backgroundColor:
+                        const Color(0xFF40513B), // Màu xanh đậm cho nút
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 100),
+                        vertical: 16, horizontal: 40), // Điều chỉnh padding
+                    minimumSize: const Size(
+                        double.infinity, 50), // Đặt chiều rộng tối đa
                   ),
                   child: const Text(
                     'Đăng nhập',
@@ -103,6 +86,7 @@ class LoginScreen extends StatelessWidget {
               ],
             ),
           ),
+
           // Nút "Đăng ký" ở dưới cùng, kéo lên để hiển thị
           Positioned(
             bottom: 0,
@@ -111,25 +95,23 @@ class LoginScreen extends StatelessWidget {
             child: GestureDetector(
               onVerticalDragUpdate: (details) {
                 if (details.primaryDelta! < 0) {
-                  // Khi kéo lên, mở bottom sheet "Đăng ký"
                   showModalBottomSheet(
                     context: context,
-                    isScrollControlled: true, // Để có thể scroll full-height
+                    isScrollControlled: true,
                     builder: (BuildContext context) {
                       return _buildRegisterSheet(context);
                     },
-                    backgroundColor:
-                        Colors.transparent, // Làm cho nền trong suốt
+                    backgroundColor: Colors.transparent,
                   );
                 }
               },
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF40513B), // Màu xanh đậm
+                  color: Color(0xFF40513B),
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30), // Bo tròn góc trên bên trái
-                    topRight: Radius.circular(30), // Bo tròn góc trên bên phải
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
                   ),
                 ),
                 child: const Row(
@@ -154,16 +136,31 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
+  // Hàm tạo TextField cho các trường đăng nhập
+  Widget _buildTextField(String labelText, bool isPassword) {
+    return TextField(
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        labelText: labelText,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+    );
+  }
+
   // Hàm tạo Bottom Sheet cho phần "Đăng ký"
   Widget _buildRegisterSheet(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.5, // Kích thước ban đầu của BottomSheet
-      minChildSize: 0.5, // Kích thước nhỏ nhất
-      maxChildSize: 0.85, // Kích thước lớn nhất khi kéo lên
+      initialChildSize: 0.5,
+      minChildSize: 0.5,
+      maxChildSize: 0.85,
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            color: Color(0xFF609966), // Màu nền của form đăng ký
+            color: Color(0xFF609966),
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(30),
               topRight: Radius.circular(30),
@@ -172,7 +169,7 @@ class LoginScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: ListView(
-              controller: scrollController, // Để có thể scroll khi kéo lên
+              controller: scrollController,
               children: [
                 Center(
                   child: Container(
@@ -196,59 +193,19 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Tên đăng nhập',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
+                _buildTextField("Tên đăng nhập", false),
                 const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                ),
+                _buildTextField("Email", false),
                 const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Mật khẩu',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  obscureText: true,
-                ),
+                _buildTextField("Mật khẩu", true),
                 const SizedBox(height: 20),
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Xác nhận mật khẩu',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
-                  obscureText: true,
-                ),
+                _buildTextField("Xác nhận mật khẩu", true),
                 const SizedBox(height: 30),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Xử lý đăng ký
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF40513B),
+                      backgroundColor: const Color(0xFF40513B),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -276,7 +233,7 @@ class LoginScreen extends StatelessWidget {
   Widget _buildForgotPasswordSheet(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Color(0xFF609966), // Màu nền của form quên mật khẩu
+        color: Color(0xFF609966),
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
@@ -308,20 +265,10 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          TextField(
-            decoration: InputDecoration(
-              labelText: 'Điền email của bạn',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
+          _buildTextField("Điền email của bạn", false),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              // Xử lý đặt lại mật khẩu
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -329,8 +276,7 @@ class LoginScreen extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  const Color(0xFF40513B), // Màu nút "Đặt lại mật khẩu"
+              backgroundColor: const Color(0xFF40513B),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
