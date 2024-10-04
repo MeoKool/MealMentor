@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/Setting/contact.dart';
+import 'package:mealmentor/screens/Setting/favourite.dart';
 import 'package:mealmentor/screens/Setting/subscribe.dart';
 import 'package:mealmentor/screens/Setting/editProfile.dart';
 
@@ -72,11 +73,17 @@ class ProfileScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
-                const ListTile(
+                ListTile(
                   leading: Icon(Icons.favorite_outline, size: 30),
                   title: Text(
                     'Yêu thích',
                     style: TextStyle(fontSize: 18),
+                  ),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FavouritePage(),
+                    ),
                   ),
                 ),
                 ListTile(
