@@ -23,7 +23,7 @@ class SearchScreen extends StatelessWidget {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
-                          'images/backgroundSearch.jpg'), // Thay bằng hình ảnh của bạn
+                          'assets/images/backgroundSearch.jpg'), // Thay bằng hình ảnh của bạn
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -75,17 +75,17 @@ class SearchScreen extends StatelessWidget {
                 childAspectRatio: 0.8,
                 children: [
                   _buildRecipeCard(
-                      'Hamburger chay', 'Rs. 1234', 'images/recipe1.png'),
+                      'Hamburger chay', 'Rs. 1234', 'assets/images/recipe1.png'),
                   _buildRecipeCard(
-                      'Pizza chay', 'Rs. 1234', 'images/recipe2.png'),
+                      'Pizza chay', 'Rs. 1234', 'assets/images/recipe2.png'),
                   _buildRecipeCard(
-                      'Salad chay', 'Rs. 1234', 'images/recipe1.png'),
+                      'Salad chay', 'Rs. 1234', 'assets/images/recipe1.png'),
                   _buildRecipeCard(
-                      'Burger chay', 'Rs. 1234', 'images/recipe1.png'),
+                      'Burger chay', 'Rs. 1234', 'assets/images/recipe1.png'),
                   _buildRecipeCard(
-                      'Sandwich chay', 'Rs. 1234', 'images/recipe1.png'),
+                      'Sandwich chay', 'Rs. 1234', 'assets/images/recipe1.png'),
                   _buildRecipeCard(
-                      'Salad rau', 'Rs. 1234', 'images/recipe2.png'),
+                      'Salad rau', 'Rs. 1234', 'assets/images/recipe2.png'),
                 ],
               ),
             ),
