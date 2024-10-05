@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/home_screen.dart';
 
-void main() { runApp(
+void main() {
+  runApp(
     DevicePreview(
       enabled: !kReleaseMode,
-      builder: (context) =>  FlutterApp(), // Wrap your app
+      builder: (context) => FlutterApp(), // Wrap your app
     ),
-  );runApp(FlutterApp());
+  );
+
 }
 
 class FlutterApp extends StatelessWidget {
