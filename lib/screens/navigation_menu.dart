@@ -4,7 +4,6 @@ import 'package:mealmentor/screens/homepage_screen.dart';
 import 'package:mealmentor/screens/mealPlan_screen.dart';
 import 'package:mealmentor/screens/search_screen.dart';
 import 'package:mealmentor/screens/notification_screen.dart';
-import 'package:mealmentor/screens/setting_screen.dart';
 
 class NavigationMenu extends StatefulWidget {
   @override
@@ -18,88 +17,6 @@ class _NavigationMenuState extends State<NavigationMenu> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF609966),
-      // Custom floating action button in the center
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _selectedIndex = 2; // Setting the middle item as selected
-          });
-        },
-        backgroundColor: const Color(0xFF609966),
-        child: const Icon(
-          Icons.restaurant_menu, // Replace with your chef hat icon
-          size: 30,
-          color: Color(0xFF40513B),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 4.0,
-        child: Container(
-          height: 50,
-          decoration: const BoxDecoration(
-            color: Color(0xFF609966),
-            // borderRadius: BorderRadius.only(
-            //   topLeft: Radius.circular(20),
-            //   topRight: Radius.circular(20),
-            // ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              // Home Button
-              IconButton(
-                icon: Icon(
-                  Icons.home,
-                  color: _selectedIndex == 0
-                      ? Color(0xFF40513B)
-                      : const Color.fromARGB(102, 64, 81, 59),
-                  size: 30,
-                ),
-                onPressed: () {
-                  _onItemTapped(0);
-                },
-              ),
-              // Search Button
-              IconButton(
-                icon: Icon(Icons.search,
-                    color: _selectedIndex == 1
-                        ? Color(0xFF40513B)
-                        : const Color.fromARGB(102, 64, 81, 59),
-                    size: 30),
-                onPressed: () {
-                  _onItemTapped(1);
-                },
-              ),
-              // Spacer for the floating button
-              const SizedBox(width: 50),
-              // Notification Button
-              IconButton(
-                icon: Icon(Icons.notifications,
-                    color: _selectedIndex == 3
-                        ? Color(0xFF40513B)
-                        : const Color.fromARGB(102, 64, 81, 59),
-                    size: 30),
-                onPressed: () {
-                  _onItemTapped(3);
-                },
-              ),
-              // Settings Button
-              IconButton(
-                icon: Icon(Icons.settings,
-                    color: _selectedIndex == 4
-                        ? Color(0xFF40513B)
-                        : const Color.fromARGB(102, 64, 81, 59),
-                    size: 30),
-                onPressed: () {
-                  _onItemTapped(4);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
       body: Column(
         children: [
           Expanded(
@@ -107,12 +24,127 @@ class _NavigationMenuState extends State<NavigationMenu> {
           ),
         ],
       ),
+      // Your custom floating navigation bar
+      bottomNavigationBar: Container(
+        height: 80,
+        width: MediaQuery.of(context).size.width,
+        child: Stack(
+          children: [
+            // Background of the navigation bar
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                height: 60,
+                decoration: BoxDecoration(
+                  color: Color(0xFF609966), // Background color
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+              ),
+            ),
+            // Center button
+            Positioned(
+              bottom: 10, // Adjusts the button's vertical position
+              left: MediaQuery.of(context).size.width / 2 - 35, // Center the button horizontally
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIndex = 2; // Set the middle item as selected
+                  });
+                },
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF609966),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        spreadRadius: 2,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.restaurant_menu, // Replace with your desired icon
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Left icons
+            Positioned(
+              bottom: 20,
+              left: 30,
+              child: GestureDetector(
+                onTap: () {
+                  _onItemTapped(0);
+                },
+                child: Icon(
+                  Icons.home,
+                  size: 30,
+                  color: _selectedIndex == 0 ? Colors.white : Colors.white54,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              left: 110,
+              child: GestureDetector(
+                onTap: () {
+                  _onItemTapped(1);
+                },
+                child: Icon(
+                  Icons.search,
+                  size: 30,
+                  color: _selectedIndex == 1 ? Colors.white : Colors.white54,
+                ),
+              ),
+            ),
+            // Right icons
+            Positioned(
+              bottom: 20,
+              right: 110,
+              child: GestureDetector(
+                onTap: () {
+                  _onItemTapped(3);
+                },
+                child: Icon(
+                  Icons.notifications,
+                  size: 30,
+                  color: _selectedIndex == 3 ? Colors.white : Colors.white54,
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 20,
+              right: 30,
+              child: GestureDetector(
+                onTap: () {
+                  _onItemTapped(4);
+                },
+                child: Icon(
+                  Icons.settings,
+                  size: 30,
+                  color: _selectedIndex == 4 ? Colors.white : Colors.white54,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Update selected index
+      _selectedIndex = index; // Update the selected index
     });
   }
 

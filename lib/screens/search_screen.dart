@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/detailsRecipe.dart';
 
 class SearchScreen extends StatelessWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -74,21 +75,81 @@ class SearchScreen extends StatelessWidget {
                 mainAxisSpacing: 10,
                 childAspectRatio: 0.8,
                 children: [
-                  _buildRecipeCard(
-                      'Hamburger chay', 'Rs. 1234', 'assets/images/recipe1.png'),
-                  _buildRecipeCard(
-                      'Pizza chay', 'Rs. 1234', 'assets/images/recipe2.png'),
-                  _buildRecipeCard(
-                      'Salad chay', 'Rs. 1234', 'assets/images/recipe1.png'),
-                  _buildRecipeCard(
-                      'Burger chay', 'Rs. 1234', 'assets/images/recipe1.png'),
-                  _buildRecipeCard(
-                      'Sandwich chay', 'Rs. 1234', 'assets/images/recipe1.png'),
-                  _buildRecipeCard(
-                      'Salad rau', 'Rs. 1234', 'assets/images/recipe2.png'),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecipeDetailPage(),
+                        ),
+                      );
+                    },
+                    child: _buildRecipeCard(
+                        'Hamburger chay', 'Rs. 1234', 'images/recipe1.png'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecipeDetailPage(),
+                        ),
+                      );
+                    },
+                    child: _buildRecipeCard(
+                        'Pizza chay', 'Rs. 1234', 'images/recipe2.png'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecipeDetailPage(),
+                        ),
+                      );
+                    },
+                    child: _buildRecipeCard(
+                        'Salad chay', 'Rs. 1234', 'images/recipe1.png'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecipeDetailPage(),
+                        ),
+                      );
+                    },
+                    child: _buildRecipeCard(
+                        'Burger chay', 'Rs. 1234', 'images/recipe1.png'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecipeDetailPage(),
+                        ),
+                      );
+                    },
+                    child: _buildRecipeCard(
+                        'Sandwich chay', 'Rs. 1234', 'images/recipe1.png'),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecipeDetailPage(),
+                        ),
+                      );
+                    },
+                    child: _buildRecipeCard(
+                        'Salad rau', 'Rs. 1234', 'images/recipe2.png'),
+                  ),
                 ],
               ),
-            ),
+            )
           ],
         ),
       ),

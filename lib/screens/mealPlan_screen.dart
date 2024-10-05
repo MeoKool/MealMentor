@@ -89,11 +89,15 @@ class MealPlanScreen extends StatelessWidget {
                       'meeting with client singapore',
                       '1100 thích món ăn này',
                       'assets/images/recipe1.png'),
+                      'assets/images/recipe1.png'),
                   buildMealCard('Buổi trưa', 'Project app bapaarekraf', '',
+                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
                       '1100 thích món ăn này', 'assets/images/recipe1.png'),
                   buildMealCard('Buổi chiều', 'Project app bapaarekraf', '',
                       '1100 thích món ăn này', 'assets/images/recipe1.png'),
+                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
                   buildMealCard('Buổi tối', 'Project app bapaarekraf', '',
+                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
                       '1100 thích món ăn này', 'assets/images/recipe1.png'),
                 ],
               ),
@@ -107,19 +111,29 @@ class MealPlanScreen extends StatelessWidget {
   Widget buildDateButton(String day, String date, bool isSelected) {
     return Container(
       padding: EdgeInsets.all(8.0),
+      width: 70,
+      height: 90,
       decoration: BoxDecoration(
         color: isSelected ? Color(0xFF374A37) : Colors.white,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             day,
-            style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+            style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
           ),
           Text(
             date,
-            style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+            style: TextStyle(
+                color: isSelected ? Colors.white : Colors.black,
+                fontSize: 22,
+                fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -128,21 +142,47 @@ class MealPlanScreen extends StatelessWidget {
 
   Widget buildMealCard(String timeOfDay, String title, String subtitle,
       String likes, String imagePath) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      child: ListTile(
-        leading:
-            Image.asset(imagePath, width: 60, height: 60, fit: BoxFit.cover),
-        title: Text(title),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (subtitle.isNotEmpty) Text(subtitle),
-            Text(likes),
+            Text(
+              timeOfDay,
+              style: TextStyle(
+                  color: Color(0xFF374A37), // dark green
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                'Xem thêm',
+                style: TextStyle(
+                    color: Color(0xFF374A37), // dark green
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
-        trailing: Icon(Icons.edit),
-      ),
+        Card(
+          margin: EdgeInsets.symmetric(vertical: 8.0),
+          child: ListTile(
+            leading: Image.asset(imagePath,
+                width: 60, height: 60, fit: BoxFit.cover),
+            title: Text(title),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (subtitle.isNotEmpty) Text(subtitle),
+                Text(likes),
+              ],
+            ),
+            trailing: Icon(Icons.edit),
+          ),
+        ),
+      ],
     );
   }
 }
