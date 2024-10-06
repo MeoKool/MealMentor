@@ -1,8 +1,146 @@
 import 'package:flutter/material.dart';
 import 'nutrition_screen.dart';
 
-class MealPlanScreen extends StatelessWidget {
+class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
+
+  @override
+  _MealPlanScreenState createState() => _MealPlanScreenState();
+}
+
+class _MealPlanScreenState extends State<MealPlanScreen> {
+  // The selected index of the day
+  int selectedDayIndex = 0;
+
+  // Dummy data for each day of the week
+  final List<Map<String, dynamic>> weekMealData = [
+    {
+      'day': 'SUN',
+      'date': '1',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '500 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '600 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    },
+    {
+      'day': 'MON',
+      'date': '2',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '400 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '700 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    },
+    {
+      'day': 'TUE',
+      'date': '3',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '350 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '700 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    },
+    {
+      'day': 'WED',
+      'date': '4',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '250 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '700 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    },
+    {
+      'day': 'THU',
+      'date': '5',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '150 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '700 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    },
+    {
+      'day': 'FRI',
+      'date': '6',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '100 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '900 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    },
+    {
+      'day': 'SUN',
+      'date': '7',
+      'meals': [
+        {
+          'timeOfDay': 'Buổi sáng',
+          'title': 'Breakfast',
+          'likes': '550 thích món ăn này',
+          'image': 'assets/images/recipe1.png'
+        },
+        {
+          'timeOfDay': 'Buổi trưa',
+          'title': 'Lunch',
+          'likes': '900 thích món ăn này',
+          'image': 'assets/images/recipe2.png'
+        },
+      ],
+    }
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +189,28 @@ class MealPlanScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
-            // Date selector
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                buildDateButton('SUN', '1', false),
-                buildDateButton('MON', '2', false),
-                buildDateButton('TUE', '3', false),
-                buildDateButton('WED', '4', true),
-              ],
+            // Date selector for the week
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(weekMealData.length, (index) {
+                  return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedDayIndex = index;
+                          });
+                        },
+                        child: buildDateButton(
+                          weekMealData[index]['day'],
+                          weekMealData[index]['date'],
+                          index == selectedDayIndex,
+                        ),
+                      ));
+                }),
+              ),
             ),
             SizedBox(height: 16),
             // Nutrition summary button
@@ -83,36 +234,17 @@ class MealPlanScreen extends StatelessWidget {
             // Meal cards
             Expanded(
               child: ListView(
-                children: [
-                  buildMealCard(
-                    'Buổi sáng',
-                    'Go to office',
-                    'meeting with client singapore',
-                    '1100 thích món ăn này',
-                    'assets/images/recipe1.png',
-                  ),
-                  buildMealCard(
-                    'Buổi trưa',
-                    'Project app bapaarekraf',
+                children:
+                    weekMealData[selectedDayIndex]['meals'].map<Widget>((meal) {
+                  return buildMealCard(
+                    meal['timeOfDay'],
+                    meal['title'],
                     '',
-                    '1100 thích món ăn này',
-                    'assets/images/recipe1.png',
-                  ),
-                  buildMealCard(
-                    'Buổi chiều',
-                    'Project app bapaarekraf',
-                    '',
-                    '1100 thích món ăn này',
-                    'assets/images/recipe1.png',
-                  ),
-                  buildMealCard(
-                    'Buổi tối',
-                    'Project app bapaarekraf',
-                    '',
-                    '1100 thích món ăn này',
-                    'assets/images/recipe1.png',
-                  ),
-                ],
+                    meal['likes'],
+                    meal['image'],
+                  );
+                }).toList(),
+
               ),
             ),
           ],
