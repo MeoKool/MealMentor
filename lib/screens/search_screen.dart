@@ -24,7 +24,7 @@ class SearchScreen extends StatelessWidget {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
-                          'images/backgroundSearch.jpg'), // Thay bằng hình ảnh của bạn
+                          'assets/images/backgroundSearch.jpg'), // Thay bằng hình ảnh của bạn
                       fit: BoxFit.cover,
                     ),
                   ),

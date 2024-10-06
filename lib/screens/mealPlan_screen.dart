@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'nutrition_screen.dart'; 
 class MealPlanScreen extends StatelessWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
 
@@ -62,19 +62,20 @@ class MealPlanScreen extends StatelessWidget {
             ),
             SizedBox(height: 16),
             // Nutrition summary button
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  backgroundColor: Color(0xFF374A37), // dark green
-                ),
-                child: Text(
-                  'Dinh dưỡng trong ngày',
-                  style:
-                      TextStyle(color: Colors.white), // Set text color to white
-                ),
+            ElevatedButton(
+              onPressed: () {
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NutritionScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF374A37), // dark green
+              ),
+              child: Text(
+                'Dinh dưỡng trong ngày',
+                style:
+                    TextStyle(color: Colors.white), // Set text color to white
               ),
             ),
             SizedBox(height: 16),
@@ -88,11 +89,15 @@ class MealPlanScreen extends StatelessWidget {
                       'meeting with client singapore',
                       '1100 thích món ăn này',
                       'assets/images/recipe1.png'),
+                      'assets/images/recipe1.png'),
                   buildMealCard('Buổi trưa', 'Project app bapaarekraf', '',
+                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
                       '1100 thích món ăn này', 'assets/images/recipe1.png'),
                   buildMealCard('Buổi chiều', 'Project app bapaarekraf', '',
                       '1100 thích món ăn này', 'assets/images/recipe1.png'),
+                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
                   buildMealCard('Buổi tối', 'Project app bapaarekraf', '',
+                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
                       '1100 thích món ăn này', 'assets/images/recipe1.png'),
                 ],
               ),
