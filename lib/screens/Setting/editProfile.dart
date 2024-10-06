@@ -7,7 +7,7 @@ class EditProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Thông tin cá nhân", style: TextStyle(color: Colors.grey)),
+        title: Text("Thông tin cá nhân", style: TextStyle(color: Colors.white)),
         backgroundColor: Color(0xFF9dc08b),
         elevation: 0,
         centerTitle: false,
@@ -57,7 +57,10 @@ class EditProfileScreen extends StatelessWidget {
                 backgroundColor: Color(0xFF374A37), // dark green button
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
               ),
-              child: Text('Xác nhận'),
+              child: Text(
+                'Xác nhận',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),

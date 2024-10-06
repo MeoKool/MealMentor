@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'nutrition_screen.dart';
 
 class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
@@ -213,19 +214,20 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             ),
             SizedBox(height: 16),
             // Nutrition summary button
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 40),
-                  backgroundColor: Color(0xFF374A37), // dark green
-                ),
-                child: Text(
-                  'Dinh dưỡng trong ngày',
-                  style:
-                      TextStyle(color: Colors.white), // Set text color to white
-                ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NutritionScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF374A37), // dark green
+              ),
+              child: Text(
+                'Dinh dưỡng trong ngày',
+                style:
+                    TextStyle(color: Colors.white), // Set text color to white
               ),
             ),
             SizedBox(height: 16),
@@ -242,6 +244,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     meal['image'],
                   );
                 }).toList(),
+
               ),
             ),
           ],
