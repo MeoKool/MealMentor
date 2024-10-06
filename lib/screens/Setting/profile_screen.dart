@@ -3,7 +3,7 @@ import 'package:mealmentor/screens/Setting/contact.dart';
 import 'package:mealmentor/screens/Setting/favourite.dart';
 import 'package:mealmentor/screens/Setting/subscribe.dart';
 import 'package:mealmentor/screens/Setting/editProfile.dart';
-
+import 'package:mealmentor/screens/Setting/pickpackage_screen.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
@@ -96,7 +96,7 @@ class ProfileScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const SubscriptionScreen(),
+                        builder: (context) => const PickPackageScreen(),
                       ),
                     );
                   },
