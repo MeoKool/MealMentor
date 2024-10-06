@@ -50,6 +50,7 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
                   subtitle: Text(package.description),
                   value: package.title,
                   groupValue: selectedPackage,
+                  activeColor: Colors.green, // Set the active color to green
                   onChanged: (value) {
                     setState(() {
                       selectedPackage = value; // Update the selected package
@@ -77,6 +78,7 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
                   title: Text(method),
                   value: method,
                   groupValue: selectedPaymentMethod,
+                  activeColor: Colors.green, // Set the active color to green
                   onChanged: (value) {
                     setState(() {
                       selectedPaymentMethod = value; // Update the selected payment method
@@ -89,26 +91,31 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
           // Confirm button
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: () {
-                if (selectedPackage != null && selectedPaymentMethod != null) {
-                  // Navigate to SubscriptionScreen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SubscriptionScreen(), // Make sure to import this screen
-                    ),
-                  );
-                } else {
-                  // Show an error message if selections are not made
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Vui lòng chọn gói đăng ký và phương thức thanh toán.'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Xác nhận'),
+            child: Center( // Center the button
+              child: SizedBox(
+                width: double.infinity, // Make the button full width
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (selectedPackage != null && selectedPaymentMethod != null) {
+                      // Navigate to SubscriptionScreen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SubscriptionScreen(), // Make sure to import this screen
+                        ),
+                      );
+                    } else {
+                      // Show an error message if selections are not made
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Vui lòng chọn gói đăng ký và phương thức thanh toán.'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Xác nhận'),
+                ),
+              ),
             ),
           ),
         ],
@@ -127,4 +134,4 @@ class Package {
     required this.description,
     required this.price,
   });
-}
+} 
