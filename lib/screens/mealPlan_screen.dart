@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'nutrition_screen.dart'; 
+import 'nutrition_screen.dart';
+
 class MealPlanScreen extends StatelessWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
 
@@ -64,7 +65,7 @@ class MealPlanScreen extends StatelessWidget {
             // Nutrition summary button
             ElevatedButton(
               onPressed: () {
-                 Navigator.push(
+                Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => NutritionScreen()),
                 );
@@ -84,21 +85,33 @@ class MealPlanScreen extends StatelessWidget {
               child: ListView(
                 children: [
                   buildMealCard(
-                      'Buổi sáng',
-                      'Go to office',
-                      'meeting with client singapore',
-                      '1100 thích món ăn này',
-                      'assets/images/recipe1.png'),
-                      'assets/images/recipe1.png'),
-                  buildMealCard('Buổi trưa', 'Project app bapaarekraf', '',
-                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
-                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
-                  buildMealCard('Buổi chiều', 'Project app bapaarekraf', '',
-                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
-                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
-                  buildMealCard('Buổi tối', 'Project app bapaarekraf', '',
-                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
-                      '1100 thích món ăn này', 'assets/images/recipe1.png'),
+                    'Buổi sáng',
+                    'Go to office',
+                    'meeting with client singapore',
+                    '1100 thích món ăn này',
+                    'assets/images/recipe1.png',
+                  ),
+                  buildMealCard(
+                    'Buổi trưa',
+                    'Project app bapaarekraf',
+                    '',
+                    '1100 thích món ăn này',
+                    'assets/images/recipe1.png',
+                  ),
+                  buildMealCard(
+                    'Buổi chiều',
+                    'Project app bapaarekraf',
+                    '',
+                    '1100 thích món ăn này',
+                    'assets/images/recipe1.png',
+                  ),
+                  buildMealCard(
+                    'Buổi tối',
+                    'Project app bapaarekraf',
+                    '',
+                    '1100 thích món ăn này',
+                    'assets/images/recipe1.png',
+                  ),
                 ],
               ),
             ),
@@ -124,16 +137,18 @@ class MealPlanScreen extends StatelessWidget {
           Text(
             day,
             style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold),
+              color: isSelected ? Colors.white : Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Text(
             date,
             style: TextStyle(
-                color: isSelected ? Colors.white : Colors.black,
-                fontSize: 22,
-                fontWeight: FontWeight.bold),
+              color: isSelected ? Colors.white : Colors.black,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -150,18 +165,20 @@ class MealPlanScreen extends StatelessWidget {
             Text(
               timeOfDay,
               style: TextStyle(
-                  color: Color(0xFF374A37), // dark green
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+                color: Color(0xFF374A37), // dark green
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             TextButton(
               onPressed: () {},
               child: Text(
                 'Xem thêm',
                 style: TextStyle(
-                    color: Color(0xFF374A37), // dark green
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
+                  color: Color(0xFF374A37), // dark green
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
