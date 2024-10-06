@@ -1,16 +1,144 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mealmentor/screens/changePassword.dart';
-import 'package:mealmentor/screens/homepage_screen.dart';
 import 'package:mealmentor/screens/navigation_menu.dart';
 import 'Setting/profile_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
+  // TextEditingController để quản lý dữ liệu nhập vào
+  static final TextEditingController _usernameController =
+      TextEditingController();
+  static final TextEditingController _passwordController =
+      TextEditingController();
+  static final TextEditingController _registerUserNameController =
+      TextEditingController();
+  static final TextEditingController _registerEmailController =
+      TextEditingController();
+  static final TextEditingController _registerPasswordController =
+      TextEditingController();
+  static final TextEditingController _registerConfirmPasswordController =
+      TextEditingController();
+
+  // Hàm đăng nhập
+  Future<void> _login(BuildContext context) async {
+    final String apiUrl = 'https://meal-mentor.uydev.id.vn/api/Account/login';
+
+    // Tạo dữ liệu đăng nhập
+    final Map<String, dynamic> loginData = {
+      "email": _usernameController.text.trim(),
+      "password": _passwordController.text,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(loginData),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NavigationMenu()),
+        );
+      } else {
+        _showDialog(context, "Đăng nhập thất bại",
+            "Vui lòng kiểm tra lại thông tin đăng nhập.");
+      }
+    } catch (e) {
+      _showDialog(context, "Lỗi", "Không thể kết nối đến máy chủ.");
+    }
+  }
+
+  // Hàm đăng ký
+  Future<void> _register(BuildContext context) async {
+    final String registerUrl =
+        'https://meal-mentor.uydev.id.vn/api/Account/register';
+
+    // Tạo dữ liệu đăng ký
+    final Map<String, dynamic> registerData = {
+      "userName": _registerUserNameController.text.trim(),
+      "email": _registerEmailController.text.trim(),
+      "password": _registerPasswordController.text,
+      "confirmPassword": _registerConfirmPasswordController.text,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(registerUrl),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(registerData),
+      );
+
+      final Map<String, dynamic> responseData = json.decode(response.body);
+
+      String statusCodeCheck = responseData['statusCode'].toString();
+
+      print('ResponseCode: $statusCodeCheck');
+
+      if (statusCodeCheck == '200') {
+        _showDialog1(context, "Đăng ký thành công",
+            "Tài khoản của bạn đã được tạo thành công. Hãy đăng nhập.");
+      } else {
+        _showDialog(context, "Đăng ký thất bại", responseData['message']);
+      }
+    } catch (e) {
+      _showDialog(context, "Lỗi", "Không thể kết nối đến máy chủ.");
+    }
+  }
+
+  void _showDialog1(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Xác nhận"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng Dialog
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          LoginScreen()), // Thay NewPage bằng trang bạn muốn chuyển tới
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Hàm hiển thị hộp thoại thông báo
+  void _showDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF9DC08B), // Màu nền xanh lá
+      backgroundColor: const Color(0xFF9DC08B),
       body: Stack(
         children: [
           Positioned(
@@ -19,9 +147,8 @@ class LoginScreen extends StatelessWidget {
             right: 50,
             child: Column(
               children: [
-                // Hình logo Meal Mentor
                 Image.asset(
-                  'assets/images/logoApp.png', // Thay bằng hình ảnh thực tế của bạn
+                  'assets/images/logoApp.png',
                   width: 200,
                   height: 200,
                   fit: BoxFit.contain,
@@ -29,12 +156,11 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Form đăng nhập
-                _buildTextField("Tên đăng nhập:", false),
+                _buildTextField("Tên đăng nhập:", _usernameController, false),
                 const SizedBox(height: 20),
-                _buildTextField("Mật khẩu:", true),
+                _buildTextField("Mật khẩu:", _passwordController, true),
                 const SizedBox(height: 10),
 
-                // Text quên mật khẩu
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
@@ -56,24 +182,18 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Nút "Đăng nhập"
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => NavigationMenu()),
-                    );
+                    _login(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        const Color(0xFF40513B), // Màu xanh đậm cho nút
+                    backgroundColor: const Color(0xFF40513B),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 40), // Điều chỉnh padding
-                    minimumSize: const Size(
-                        double.infinity, 50), // Đặt chiều rộng tối đa
+                        vertical: 16, horizontal: 40),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                   child: const Text(
                     'Đăng nhập',
@@ -87,7 +207,7 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
 
-          // Nút "Đăng ký" ở dưới cùng, kéo lên để hiển thị
+          // Nút "Đăng ký" ở dưới cùng
           Positioned(
             bottom: 0,
             left: 0,
@@ -136,9 +256,11 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Hàm tạo TextField cho các trường đăng nhập
-  Widget _buildTextField(String labelText, bool isPassword) {
+  // Hàm tạo TextField với TextEditingController
+  Widget _buildTextField(
+      String labelText, TextEditingController controller, bool isPassword) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
       decoration: InputDecoration(
         labelText: labelText,
@@ -151,10 +273,10 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Hàm tạo Bottom Sheet cho phần "Đăng ký"
+  // Bottom Sheet cho phần "Đăng ký"
   Widget _buildRegisterSheet(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.5,
+      initialChildSize: 0.8,
       minChildSize: 0.5,
       maxChildSize: 0.85,
       builder: (context, scrollController) {
@@ -193,17 +315,21 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildTextField("Tên đăng nhập", false),
+                _buildTextField(
+                    "Tên đăng nhập", _registerUserNameController, false),
                 const SizedBox(height: 20),
-                _buildTextField("Email", false),
+                _buildTextField("Email", _registerEmailController, false),
                 const SizedBox(height: 20),
-                _buildTextField("Mật khẩu", true),
+                _buildTextField("Mật khẩu", _registerPasswordController, true),
                 const SizedBox(height: 20),
-                _buildTextField("Xác nhận mật khẩu", true),
+                _buildTextField("Xác nhận mật khẩu",
+                    _registerConfirmPasswordController, true),
                 const SizedBox(height: 30),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _register(context);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF40513B),
                       shape: RoundedRectangleBorder(
@@ -229,7 +355,7 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Hàm tạo Bottom Sheet cho phần "Quên mật khẩu"
+  // Bottom Sheet cho phần "Quên mật khẩu"
   Widget _buildForgotPasswordSheet(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
@@ -265,7 +391,7 @@ class LoginScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          _buildTextField("Điền email của bạn", false),
+          _buildTextField("Điền email của bạn", TextEditingController(), false),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
