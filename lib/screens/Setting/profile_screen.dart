@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/Setting/contact.dart';
 import 'package:mealmentor/screens/Setting/favourite.dart';
-import 'package:mealmentor/screens/Setting/subscribe.dart';
+import 'package:mealmentor/screens/login_screen.dart';
 import 'package:mealmentor/screens/Setting/editProfile.dart';
 import 'package:mealmentor/screens/Setting/pickpackage_screen.dart';
 class ProfileScreen extends StatelessWidget {
@@ -101,11 +101,53 @@ class ProfileScreen extends StatelessWidget {
                     );
                   },
                 ),
+                 const SizedBox(height: 20),
+                  ListTile(
+                  leading: const Icon(Icons.logout, size: 30, color: Colors.red),
+                  title: const Text(
+                    'Đăng xuất',
+                    style: TextStyle(fontSize: 18, color: Colors.red),
+                  ),
+                  onTap: () => _showLogoutDialog(context), // Show logout confirmation dialog
+                ),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+
+   void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Xác nhận đăng xuất'),
+          content: const Text('Bạn có chắc chắn muốn đăng xuất?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Hủy'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: const Text('Đăng xuất'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(), // Navigate to the LoginScreen
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
