@@ -101,12 +101,12 @@ class ProfileScreen extends StatelessWidget {
                     );
                   },
                 ),
-                 const SizedBox(height: 20),
+                 const SizedBox(height: 0),
                   ListTile(
-                  leading: const Icon(Icons.logout, size: 30, color: Colors.red),
+                  leading: const Icon(Icons.logout, size: 30, color: Color.fromARGB(255, 224, 29, 15)),
                   title: const Text(
                     'Đăng xuất',
-                    style: TextStyle(fontSize: 18, color: Colors.red),
+                    style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 224, 29, 15)),
                   ),
                   onTap: () => _showLogoutDialog(context), // Show logout confirmation dialog
                 ),
