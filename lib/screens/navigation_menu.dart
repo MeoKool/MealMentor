@@ -151,7 +151,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
   Widget _getSelectedPage(int index) {
     switch (index) {
       case 0:
-        return const HomePage(); // Home Page
+        return const HomePageScreen(); // Home Page
       case 1:
         return const SearchScreen(); // Search Page
       case 2:
@@ -161,7 +161,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 4:
         return const ProfileScreen(); // Settings Page
       default:
-        return const HomePage(); // Default to Home Page
+        return const HomePageScreen(); // Default to Home Page
     }
   }
 }
