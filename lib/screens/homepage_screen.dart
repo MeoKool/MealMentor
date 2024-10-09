@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/Setting/profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+
+class HomePageScreen extends StatefulWidget {
+  const HomePageScreen({Key? key}) : super(key: key);
+
+  @override
+  State<HomePageScreen> createState() => _HomePageScreenState();
+}
+class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAliveClientMixin {
+  String username = '';
+  String token = '';
+  String email = '';
+  String userId = '';
+  @override
+  void initState() {
+    super.initState();
+    fetchUserInfo();
+  }
+
+  void fetchUserInfo() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      username = prefs.getString('username') ?? '';
+      token = prefs.getString('token') ?? '';
+      email = prefs.getString('email') ?? '';
+      userId = prefs.getString('userId') ?? '';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +46,7 @@ class HomePage extends StatelessWidget {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
                       "🌞 Chào bạn,",
                       style: TextStyle(
@@ -29,7 +55,7 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "Hello World",
+                      username,
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
@@ -311,6 +337,8 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+  @override
+  bool get wantKeepAlive => true;
 }
 
 // Hàm tạo nút thực đơn

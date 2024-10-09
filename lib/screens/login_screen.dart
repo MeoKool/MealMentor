@@ -1,29 +1,29 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mealmentor/screens/changePassword.dart';
 import 'package:mealmentor/screens/navigation_menu.dart';
-import 'Setting/profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   // TextEditingController để quản lý dữ liệu nhập vào
-  static final TextEditingController _usernameController =
-      TextEditingController();
-  static final TextEditingController _passwordController =
-      TextEditingController();
-  static final TextEditingController _registerUserNameController =
-      TextEditingController();
-  static final TextEditingController _registerEmailController =
-      TextEditingController();
-  static final TextEditingController _registerPasswordController =
-      TextEditingController();
-  static final TextEditingController _registerConfirmPasswordController =
-      TextEditingController();
+  static final TextEditingController _usernameController = TextEditingController();
+  static final TextEditingController _passwordController = TextEditingController();
+  static final TextEditingController _registerUserNameController = TextEditingController();
+  static final TextEditingController _registerEmailController = TextEditingController();
+  static final TextEditingController _registerPasswordController = TextEditingController();
+  static final TextEditingController _registerConfirmPasswordController = TextEditingController();
 
   // Hàm đăng nhập
   Future<void> _login(BuildContext context) async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
     final String apiUrl = 'https://meal-mentor.uydev.id.vn/api/Account/login';
 
     // Tạo dữ liệu đăng nhập
@@ -40,10 +40,37 @@ class LoginScreen extends StatelessWidget {
       );
 
       if (response.statusCode == 200) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => NavigationMenu()),
-        );
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        var data = jsonDecode(response.body);
+        String accessToken = data['data']['accessToken'];
+        prefs.setString('token', accessToken);
+
+        final verifyResponse = await http.get(
+            Uri.parse('https://meal-mentor.uydev.id.vn/api/Account/me'),
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+            });
+
+        if (verifyResponse.statusCode == 200) {
+          var verifyData = jsonDecode(verifyResponse.body);
+          prefs.setString('userId', verifyData['data']['id']);
+          prefs.setString('username', verifyData['data']['username']);
+          prefs.setString('email', verifyData['data']['email']);
+          Navigator.of(context).pop();
+          Fluttertoast.showToast(
+            msg: "Đăng nhập thành công!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.TOP,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NavigationMenu()),
+          );
+        }
       } else {
         _showDialog(context, "Đăng nhập thất bại",
             "Vui lòng kiểm tra lại thông tin đăng nhập.");
@@ -76,8 +103,6 @@ class LoginScreen extends StatelessWidget {
       final Map<String, dynamic> responseData = json.decode(response.body);
 
       String statusCodeCheck = responseData['statusCode'].toString();
-
-      print('ResponseCode: $statusCodeCheck');
 
       if (statusCodeCheck == '200') {
         _showDialog1(context, "Đăng ký thành công",
@@ -139,119 +164,120 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF9DC08B),
-      body: Stack(
-        children: [
-          Positioned(
-            top: 100,
-            left: 50,
-            right: 50,
-            child: Column(
-              children: [
-                Image.asset(
-                  'assets/images/logoApp.png',
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 20),
-
-                // Form đăng nhập
-                _buildTextField("Tên đăng nhập:", _usernameController, false),
-                const SizedBox(height: 20),
-                _buildTextField("Mật khẩu:", _passwordController, true),
-                const SizedBox(height: 10),
-
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (BuildContext context) {
-                          return _buildForgotPasswordSheet(context);
-                        },
-                        backgroundColor: Colors.transparent,
-                      );
-                    },
-                    child: const Text(
-                      'Bạn quên mật khẩu?',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                ElevatedButton(
-                  onPressed: () {
-                    _login(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF40513B),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 40),
-                    minimumSize: const Size(double.infinity, 50),
-                  ),
-                  child: const Text(
-                    'Đăng nhập',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Nút "Đăng ký" ở dưới cùng
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: GestureDetector(
-              onVerticalDragUpdate: (details) {
-                if (details.primaryDelta! < 0) {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return _buildRegisterSheet(context);
-                    },
-                    backgroundColor: Colors.transparent,
-                  );
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF40513B),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                child: const Row(
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Đăng ký',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
+                    Image.asset(
+                      'assets/images/logoApp.png',
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Form đăng nhập
+                    _buildTextField("Email:", _usernameController, false),
+                    const SizedBox(height: 20),
+                    _buildTextField("Mật khẩu:", _passwordController, true),
+                    const SizedBox(height: 10),
+
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (BuildContext context) {
+                              return _buildForgotPasswordSheet(context);
+                            },
+                            backgroundColor: Colors.transparent,
+                          );
+                        },
+                        child: const Text(
+                          'Bạn quên mật khẩu?',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
-                    SizedBox(width: 5),
-                    Icon(Icons.keyboard_arrow_up, color: Colors.white),
+                    const SizedBox(height: 20),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        _login(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF40513B),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 40),
+                        minimumSize: const Size(double.infinity, 50),
+                      ),
+                      child: const Text(
+                        'Đăng nhập',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
+            // Nút "Đăng ký" luôn nằm ở dưới cùng
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  if (details.primaryDelta! < 0) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (BuildContext context) {
+                        return _buildRegisterSheet(context);
+                      },
+                      backgroundColor: Colors.transparent,
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF40513B),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Đăng ký',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(Icons.keyboard_arrow_up, color: Colors.white),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -273,7 +299,6 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Bottom Sheet cho phần "Đăng ký"
   Widget _buildRegisterSheet(BuildContext context) {
     return DraggableScrollableSheet(
       initialChildSize: 0.8,
