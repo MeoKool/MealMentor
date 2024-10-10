@@ -268,11 +268,9 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
                 Row(
                   children: [
                     const Icon(Icons.local_fire_department, size: 16),
-                    const SizedBox(width: 5),
                     Text(calories),
                     const Spacer(),
                     const Icon(Icons.schedule, size: 16),
-                    const SizedBox(width: 5),
                     Text(time),
                   ],
                 ),
