@@ -72,6 +72,7 @@ class LoginScreen extends StatelessWidget {
           );
         }
       } else {
+        Navigator.of(context).pop();
         _showDialog(context, "Đăng nhập thất bại",
             "Vui lòng kiểm tra lại thông tin đăng nhập.");
       }

@@ -1,8 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/detailsRecipe.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class SearchScreen extends StatelessWidget {
+class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
+
+  @override
+  _SearchScreenState createState() => _SearchScreenState();
+}
+
+class _SearchScreenState extends State<SearchScreen> {
+  List<dynamic> _recipes = [];
+
+  Future<void> _fetchRecipes(String keyword) async {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return const Center(child: CircularProgressIndicator());
+        });
+    try {
+      final response = await http.get(Uri.parse(
+          'https://meal-mentor.uydev.id.vn/api/Recipe/get?keyword=$keyword&PageNumber=1&PageSize=6'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['data'] != null && data['data']['items'] != null) {
+          setState(() {
+            _recipes = data['data']['items']; // Populate the _recipes list
+          });
+        } else {
+          setState(() {
+            _recipes = []; // Ensure the list is empty if no items are found
+          });
+        }
+        Navigator.of(context).pop();
+      } else {
+        print('Failed to load recipes');
+        setState(() {
+          _recipes = []; // Handle error by emptying the list
+        });
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      print('Error fetching recipes: $e');
+      setState(() {
+        _recipes = []; // Handle error by emptying the list
+      });
+      Navigator.of(context).pop();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () {
+      _fetchRecipes(''); // Default search keyword
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +69,6 @@ class SearchScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 50),
-            // Phần ảnh nền và biểu tượng avatar
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -22,6 +76,7 @@ class SearchScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 150,
                   decoration: const BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
                     image: DecorationImage(
                       image: AssetImage(
                           'assets/images/backgroundSearch.jpg'), // Thay bằng hình ảnh của bạn
@@ -31,7 +86,7 @@ class SearchScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 60),
+            const SizedBox(height: 30),
             // Phần thanh tìm kiếm
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
@@ -41,115 +96,62 @@ class SearchScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: TextField(
                       decoration: InputDecoration(
                         hintText: "Tìm kiếm",
                         border: InputBorder.none,
                       ),
+                      onSubmitted: (value) {
+                        _fetchRecipes(value);
+                      },
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  DropdownButton<String>(
-                    value: 'Tất cả',
-                    icon: const Icon(Icons.arrow_drop_down),
-                    underline: Container(),
-                    onChanged: (String? newValue) {},
-                    items: <String>['Tất cả', 'Chay', 'Mặn']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             // Phần danh sách món ăn
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.8,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecipeDetailPage(),
-                        ),
-                      );
-                    },
-                    child: _buildRecipeCard(
-                        'Hamburger chay', 'Rs. 1234', 'images/recipe1.png'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecipeDetailPage(),
-                        ),
-                      );
-                    },
-                    child: _buildRecipeCard(
-                        'Pizza chay', 'Rs. 1234', 'images/recipe2.png'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecipeDetailPage(),
-                        ),
-                      );
-                    },
-                    child: _buildRecipeCard(
-                        'Salad chay', 'Rs. 1234', 'images/recipe1.png'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecipeDetailPage(),
-                        ),
-                      );
-                    },
-                    child: _buildRecipeCard(
-                        'Burger chay', 'Rs. 1234', 'images/recipe1.png'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecipeDetailPage(),
-                        ),
-                      );
-                    },
-                    child: _buildRecipeCard(
-                        'Sandwich chay', 'Rs. 1234', 'images/recipe1.png'),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecipeDetailPage(),
-                        ),
-                      );
-                    },
-                    child: _buildRecipeCard(
-                        'Salad rau', 'Rs. 1234', 'images/recipe2.png'),
-                  ),
-                ],
-              ),
-            )
+              child: _recipes.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Không tìm thấy món ăn nào',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.7,
+                      ),
+                      itemCount: _recipes.length,
+                      itemBuilder: (context, index) {
+                        final recipe = _recipes[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    RecipeDetailPage(recipe: recipe),
+                              ),
+                            );
+                          },
+                          child: _buildRecipeCard(
+                              recipe['name'] ?? 'No name',
+                              recipe['calories'] != null
+                                  ? '${recipe['calories'].toStringAsFixed(2)} calories'
+                                  : 'No calories',
+                              'assets/images/recipe1.png'), // Replace with real image URL if available
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),
@@ -170,34 +172,39 @@ class SearchScreen extends StatelessWidget {
             ),
             child: Image.asset(
               imagePath,
-              height: 100,
+              height: 100, // You can adjust this height as necessary
               width: double.infinity,
               fit: BoxFit.cover,
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
+            child: Expanded(
+              // Use Expanded to avoid overflow
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 5),
-                Text(price, style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 5),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Icon(
-                    Icons.favorite_border,
-                    color: Colors.grey[400],
+                  const SizedBox(height: 5),
+                  Text(price, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(height: 5),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Icon(
+                      Icons.favorite_border,
+                      color: Colors.grey[400],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
