@@ -21,8 +21,7 @@ class _SearchScreenState extends State<SearchScreen> {
         });
     try {
       final response = await http.get(Uri.parse(
-          'https://meal-mentor.uydev.id.vn/api/Recipe/get?keyword=$keyword&PageNumber=1&PageSize=6'));
-
+          'https://meal-mentor.uydev.id.vn/api/Recipe/get-by-name?keyword=$keyword&PageNumber=1&PageSize=99'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['data'] != null && data['data']['items'] != null) {
@@ -179,8 +178,6 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
-            child: Expanded(
-              // Use Expanded to avoid overflow
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -190,7 +187,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 5),
@@ -206,7 +203,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
             ),
-          ),
         ],
       ),
     );
