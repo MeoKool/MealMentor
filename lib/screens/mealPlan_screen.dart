@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/ingredientScreen.dart';
 import 'nutrition_screen.dart';
+import 'package:intl/intl.dart';
 
 class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
@@ -11,136 +13,46 @@ class MealPlanScreen extends StatefulWidget {
 class _MealPlanScreenState extends State<MealPlanScreen> {
   // The selected index of the day
   int selectedDayIndex = 0;
+  late List<Map<String, dynamic>> weekMealData;
+
+  @override
+  void initState() {
+    super.initState();
+    weekMealData = getCurrentWeekData(); // Initialize weekMealData in initState
+  }
 
   // Dummy data for each day of the week
-  final List<Map<String, dynamic>> weekMealData = [
-    {
-      'day': 'SUN',
-      'date': '1',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '500 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '600 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
-    },
-    {
-      'day': 'MON',
-      'date': '2',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '400 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '700 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
-    },
-    {
-      'day': 'TUE',
-      'date': '3',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '350 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '700 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
-    },
-    {
-      'day': 'WED',
-      'date': '4',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '250 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '700 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
-    },
-    {
-      'day': 'THU',
-      'date': '5',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '150 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '700 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
-    },
-    {
-      'day': 'FRI',
-      'date': '6',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '100 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '900 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
-    },
-    {
-      'day': 'SUN',
-      'date': '7',
-      'meals': [
-        {
-          'timeOfDay': 'Buổi sáng',
-          'title': 'Breakfast',
-          'likes': '550 thích món ăn này',
-          'image': 'assets/images/recipe1.png'
-        },
-        {
-          'timeOfDay': 'Buổi trưa',
-          'title': 'Lunch',
-          'likes': '900 thích món ăn này',
-          'image': 'assets/images/recipe2.png'
-        },
-      ],
+  List<Map<String, dynamic>> getCurrentWeekData() {
+    List<Map<String, dynamic>> weekData = [];
+    DateTime now = DateTime.now();
+    DateTime startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+
+    for (int i = 0; i < 7; i++) {
+      DateTime day = startOfWeek.add(Duration(days: i));
+      String dayName = DateFormat('EEE').format(day).toUpperCase();
+      String dayDate = day.day.toString();
+
+      weekData.add({
+        'day': dayName,
+        'date': dayDate,
+        'meals': [
+          {
+            'timeOfDay': 'Buổi sáng',
+            'title': 'Breakfast',
+            'likes': '${(500 - i * 50)} thích món ăn này',
+            'image': 'assets/images/recipe1.png'
+          },
+          {
+            'timeOfDay': 'Buổi trưa',
+            'title': 'Lunch',
+            'likes': '${(600 + i * 100)} thích món ăn này',
+            'image': 'assets/images/recipe2.png'
+          },
+        ],
+      });
     }
-  ];
+    return weekData;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,7 +60,14 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFFB5D6A0), // light green
         elevation: 0,
-        title: SizedBox(),
+        title: Text(
+          'Thực đơn hàng ngày',
+          style: TextStyle(
+            color: Color(0xFF374A37),
+          ),
+        ),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
       ),
       body: Container(
         color: Color(0xFFB5D6A0), // Background color
@@ -159,7 +78,13 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => NutritionScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF374A37), // dark green
                     shape: RoundedRectangleBorder(
@@ -167,13 +92,19 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     ),
                   ),
                   child: Text(
-                    'Tạo mới thực đơn',
+                    'Dinh dưỡng trong ngày',
                     style: TextStyle(
                         color: Colors.white), // Set text color to white
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => IngredientScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF374A37), // dark green
                     shape: RoundedRectangleBorder(
@@ -213,23 +144,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               ),
             ),
             SizedBox(height: 16),
-            // Nutrition summary button
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NutritionScreen()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF374A37), // dark green
-              ),
-              child: Text(
-                'Dinh dưỡng trong ngày',
-                style:
-                    TextStyle(color: Colors.white), // Set text color to white
-              ),
-            ),
+
             SizedBox(height: 16),
             // Meal cards
             Expanded(
@@ -244,7 +159,6 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     meal['image'],
                   );
                 }).toList(),
-
               ),
             ),
           ],
