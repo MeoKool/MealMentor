@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/ingredientScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'nutrition_screen.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
@@ -11,54 +14,100 @@ class MealPlanScreen extends StatefulWidget {
 }
 
 class _MealPlanScreenState extends State<MealPlanScreen> {
-  // The selected index of the day
   int selectedDayIndex = 0;
-  late List<Map<String, dynamic>> weekMealData;
+  List<Map<String, dynamic>> weekMealData = [];
+  String token = '';
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    weekMealData = getCurrentWeekData(); // Initialize weekMealData in initState
+    fetchUserData();
   }
 
-  // Dummy data for each day of the week
-  List<Map<String, dynamic>> getCurrentWeekData() {
-    List<Map<String, dynamic>> weekData = [];
-    DateTime now = DateTime.now();
-    DateTime startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+  Future<void> fetchUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token') ?? '';
+    });
+    fetchMealPlanData();
+  }
 
-    for (int i = 0; i < 7; i++) {
-      DateTime day = startOfWeek.add(Duration(days: i));
-      String dayName = DateFormat('EEE').format(day).toUpperCase();
-      String dayDate = day.day.toString();
+  Future<void> fetchMealPlanData() async {
+    const String apiUrl = 'https://meal-mentor.uydev.id.vn/api/PlanDate';
 
-      weekData.add({
-        'day': dayName,
-        'date': dayDate,
-        'meals': [
-          {
-            'timeOfDay': 'Buổi sáng',
-            'title': 'Breakfast',
-            'likes': '${(500 - i * 50)} thích món ăn này',
-            'image': 'assets/images/recipe1.png'
-          },
-          {
-            'timeOfDay': 'Buổi trưa',
-            'title': 'Lunch',
-            'likes': '${(600 + i * 100)} thích món ăn này',
-            'image': 'assets/images/recipe2.png'
-          },
-        ],
+    try {
+      final response = await http.get(Uri.parse(apiUrl), headers: {
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        List<Map<String, dynamic>> meals =
+            List<Map<String, dynamic>>.from(responseData['data'].map((dayData) {
+          return {
+            'day': DateFormat('EEE')
+                .format(DateTime.parse(dayData['planDate']))
+                .toUpperCase(),
+            'date': DateFormat('d').format(DateTime.parse(dayData['planDate'])),
+            'meals': List<Map<String, dynamic>>.from(
+                dayData['details'].map((detail) {
+              final meal = detail['meal'][0];
+              return {
+                'timeOfDay':
+                    detail['type'] == 'morning' ? 'Buổi sáng' : detail['type'],
+                'title': meal['name'],
+                'likes': '${meal['likeQuantity']} thích món ăn này',
+                'image': 'assets/images/recipe1.png',
+              };
+            })),
+          };
+        }));
+
+        // Generate the current week's dates
+        DateTime now = DateTime.now();
+        DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        weekMealData = List.generate(7, (index) {
+          DateTime day = startOfWeek.add(Duration(days: index));
+          String dayName = DateFormat('EEE').format(day).toUpperCase();
+          String dayDate = DateFormat('d').format(day);
+
+          // Find meal data for the current day if available
+          Map<String, dynamic>? dayData = meals.firstWhere(
+            (meal) => meal['day'] == dayName && meal['date'] == dayDate,
+            orElse: () => {'day': dayName, 'date': dayDate, 'meals': []},
+          );
+
+          return {
+            'day': dayName,
+            'date': dayDate,
+            'meals': dayData['meals'], // Will be empty if no data is found
+          };
+        });
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        print('Failed to load data');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
+      setState(() {
+        isLoading = false;
       });
     }
-    return weekData;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFB5D6A0), // light green
+        backgroundColor: Color(0xFFB5D6A0),
         elevation: 0,
         title: Text(
           'Thực đơn hàng ngày',
@@ -70,7 +119,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        color: Color(0xFFB5D6A0), // Background color
+        color: Color(0xFFB5D6A0),
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -86,15 +135,14 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37), // dark green
+                    backgroundColor: Color(0xFF374A37),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: Text(
                     'Dinh dưỡng trong ngày',
-                    style: TextStyle(
-                        color: Colors.white), // Set text color to white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 ElevatedButton(
@@ -106,21 +154,19 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37), // dark green
+                    backgroundColor: Color(0xFF374A37),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: Text(
                     'Nguyên liệu',
-                    style: TextStyle(
-                        color: Colors.white), // Set text color to white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 16),
-            // Date selector for the week
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -144,22 +190,28 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            SizedBox(height: 16),
-            // Meal cards
             Expanded(
-              child: ListView(
-                children:
-                    weekMealData[selectedDayIndex]['meals'].map<Widget>((meal) {
-                  return buildMealCard(
-                    meal['timeOfDay'],
-                    meal['title'],
-                    '',
-                    meal['likes'],
-                    meal['image'],
-                  );
-                }).toList(),
-              ),
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : weekMealData[selectedDayIndex]['meals'].isEmpty
+                      ? Center(
+                          child: Text(
+                            'Không có dữ liệu',
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        )
+                      : ListView(
+                          children: weekMealData[selectedDayIndex]['meals']
+                              .map<Widget>((meal) {
+                            return buildMealCard(
+                              meal['timeOfDay'],
+                              meal['title'],
+                              '',
+                              meal['likes'],
+                              meal['image'],
+                            );
+                          }).toList(),
+                        ),
             ),
           ],
         ),
@@ -211,7 +263,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             Text(
               timeOfDay,
               style: TextStyle(
-                color: Color(0xFF374A37), // dark green
+                color: Color(0xFF374A37),
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -221,7 +273,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               child: Text(
                 'Xem thêm',
                 style: TextStyle(
-                  color: Color(0xFF374A37), // dark green
+                  color: Color(0xFF374A37),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
