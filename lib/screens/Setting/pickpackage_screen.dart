@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mealmentor/screens/Setting/subscribe.dart';
+import 'package:mealmentor/screens/homepage_screen.dart';
+import 'package:mealmentor/screens/navigation_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 
 class PickPackageScreen extends StatefulWidget {
   const PickPackageScreen({Key? key}) : super(key: key);
@@ -337,15 +338,71 @@ class PaymentWebView extends StatelessWidget {
   }
 }
 
+// class CancelScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Thanh toán thất bại')),
+//       body: Center(
+//         child: const Text(
+//           'Thanh toán đã bị hủy.',
+//           style: TextStyle(fontSize: 18),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class SuccessScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Thanh toán thành công')),
+//       body: Center(
+//         child: const Text(
+//           'Thanh toán thành công! Cảm ơn bạn.',
+//           style: TextStyle(fontSize: 18),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
 class CancelScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Thanh toán thất bại')),
       body: Center(
-        child: const Text(
-          'Thanh toán đã bị hủy.',
-          style: TextStyle(fontSize: 18),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cancel, color: Colors.red, size: 80),
+            const SizedBox(height: 20),
+            const Text(
+              'Thanh toán đã bị hủy.',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => NavigationMenu()), // Update this to your homepage widget
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
+              child: const Text(
+                'Quay về Trang Chủ',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -358,15 +415,39 @@ class SuccessScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Thanh toán thành công')),
       body: Center(
-        child: const Text(
-          'Thanh toán thành công! Cảm ơn bạn.',
-          style: TextStyle(fontSize: 18),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 80),
+            const SizedBox(height: 20),
+            const Text(
+              'Thanh toán thành công! Cảm ơn bạn.',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => NavigationMenu()), // Update this to your homepage widget
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
+              child: const Text(
+                'Quay về Trang Chủ',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
-
 
 class Package {
   final String title;
