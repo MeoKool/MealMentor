@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/addMealPlanScreen.dart';
 import 'package:mealmentor/screens/ingredientScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'nutrition_screen.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MealPlanScreen extends StatefulWidget {
   const MealPlanScreen({Key? key}) : super(key: key);
@@ -11,54 +15,118 @@ class MealPlanScreen extends StatefulWidget {
 }
 
 class _MealPlanScreenState extends State<MealPlanScreen> {
-  // The selected index of the day
   int selectedDayIndex = 0;
-  late List<Map<String, dynamic>> weekMealData;
+  List<Map<String, dynamic>> weekMealData = [];
+  String token = '';
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    weekMealData = getCurrentWeekData(); // Initialize weekMealData in initState
+    fetchUserData();
   }
 
-  // Dummy data for each day of the week
-  List<Map<String, dynamic>> getCurrentWeekData() {
-    List<Map<String, dynamic>> weekData = [];
-    DateTime now = DateTime.now();
-    DateTime startOfWeek = now.subtract(Duration(days: now.weekday % 7));
+  Future<void> fetchUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token') ?? '';
+    });
 
-    for (int i = 0; i < 7; i++) {
-      DateTime day = startOfWeek.add(Duration(days: i));
-      String dayName = DateFormat('EEE').format(day).toUpperCase();
-      String dayDate = day.day.toString();
+    fetchMealPlanData();
+  }
 
-      weekData.add({
-        'day': dayName,
-        'date': dayDate,
-        'meals': [
-          {
-            'timeOfDay': 'Buổi sáng',
-            'title': 'Breakfast',
-            'likes': '${(500 - i * 50)} thích món ăn này',
-            'image': 'assets/images/recipe1.png'
-          },
-          {
-            'timeOfDay': 'Buổi trưa',
-            'title': 'Lunch',
-            'likes': '${(600 + i * 100)} thích món ăn này',
-            'image': 'assets/images/recipe2.png'
-          },
-        ],
+  Future<void> fetchMealPlanData() async {
+    setState(() {
+      isLoading = true;
+    });
+    const String apiUrl = 'https://meal-mentor.uydev.id.vn/api/PlanDate';
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl), headers: {
+        'Authorization': 'Bearer $token',
+      });
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+
+        // Map to group meals by date (ignoring time)
+        Map<String, Map<String, List<Map<String, dynamic>>>> mealsByDate = {};
+
+        for (var dayData in responseData['data']) {
+          // Extract only the date part (yyyy-MM-dd)
+          String dateKey = DateFormat('yyyy-MM-dd')
+              .format(DateTime.parse(dayData['planDate']));
+
+          // Initialize the structure for the day if not already present
+          mealsByDate.putIfAbsent(dateKey,
+              () => {"Buổi sáng": [], "Buổi trưa": [], "Buổi tối": []});
+
+          for (var detail in dayData['details']) {
+            // Determine the time of day
+            String timeOfDay = detail['type'] == 'morning'
+                ? 'Buổi sáng'
+                : detail['type'] == 'noon'
+                    ? 'Buổi trưa'
+                    : 'Buổi tối';
+
+            // Only proceed if the 'meal' list is not empty
+            if (detail['meal'] is List && (detail['meal'] as List).isNotEmpty) {
+              // Safely add meals to the timeOfDay list
+              mealsByDate[dateKey]![timeOfDay]!.addAll(
+                (detail['meal'] as List).map<Map<String, dynamic>>((meal) {
+                  return {
+                    'title': meal['name'] ?? 'No Title',
+                    'likes': '${meal['likeQuantity'] ?? 0} thích món ăn này',
+                    'image': 'assets/images/recipe1.png',
+                  };
+                }).toList(),
+              );
+            }
+          }
+        }
+
+        // Generate the current week's dates and populate `weekMealData` based on `mealsByDate`
+        DateTime now = DateTime.now();
+        DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+        weekMealData = List.generate(7, (index) {
+          DateTime day = startOfWeek.add(Duration(days: index));
+          String dayName = DateFormat('EEE').format(day).toUpperCase();
+          String dayDate = DateFormat('d').format(day);
+          String dateKey = DateFormat('yyyy-MM-dd').format(day);
+
+          // Find meals for the current day if available, otherwise set empty meals
+          Map<String, dynamic>? dayData = mealsByDate[dateKey] ??
+              {"Buổi sáng": [], "Buổi trưa": [], "Buổi tối": []};
+
+          return {
+            'day': dayName,
+            'date': dayDate,
+            'mealsByTime': dayData,
+          };
+        });
+
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        print('Failed to load data');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error: $e');
+      setState(() {
+        isLoading = false;
       });
     }
-    return weekData;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFB5D6A0), // light green
+        backgroundColor: Color(0xFFB5D6A0),
         elevation: 0,
         title: Text(
           'Thực đơn hàng ngày',
@@ -70,7 +138,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        color: Color(0xFFB5D6A0), // Background color
+        color: Color(0xFFB5D6A0),
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -86,15 +154,14 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37), // dark green
+                    backgroundColor: Color(0xFF374A37),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: Text(
                     'Dinh dưỡng trong ngày',
-                    style: TextStyle(
-                        color: Colors.white), // Set text color to white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 ElevatedButton(
@@ -106,21 +173,19 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37), // dark green
+                    backgroundColor: Color(0xFF374A37),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: Text(
                     'Nguyên liệu',
-                    style: TextStyle(
-                        color: Colors.white), // Set text color to white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
             ),
             SizedBox(height: 16),
-            // Date selector for the week
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -144,23 +209,61 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            SizedBox(height: 16),
-            // Meal cards
-            Expanded(
-              child: ListView(
-                children:
-                    weekMealData[selectedDayIndex]['meals'].map<Widget>((meal) {
-                  return buildMealCard(
-                    meal['timeOfDay'],
-                    meal['title'],
-                    '',
-                    meal['likes'],
-                    meal['image'],
-                  );
-                }).toList(),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddMealPlanScreen()),
+                    );
+                    if (result == true) {
+                      fetchMealPlanData();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF374A37),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    'Thêm thực đơn',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
             ),
+            Expanded(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : (weekMealData[selectedDayIndex]['mealsByTime']?.values.every((mealList) => (mealList as List).isEmpty) ??
+                          true)
+                      ? Center(
+                          child: Text(
+                            'Không có dữ liệu',
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        )
+                      : ListView(
+                          children: weekMealData[selectedDayIndex]
+                                  ['mealsByTime']!
+                              .entries
+                              .map<Widget>((entry) {
+                            String timeOfDay = entry.key;
+                            List<Map<String, dynamic>> meals =
+                                List<Map<String, dynamic>>.from(
+                                    entry.value ?? []);
+                            if (meals.isNotEmpty) {
+                              return buildMealCard(timeOfDay, meals);
+                            } else {
+                              return SizedBox.shrink();
+                            }
+                          }).toList(),
+                        ),
+            )
           ],
         ),
       ),
@@ -181,7 +284,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            day,
+            getStringDay(day).toString(),
             style: TextStyle(
               color: isSelected ? Colors.white : Colors.black,
               fontSize: 18,
@@ -201,9 +304,30 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     );
   }
 
-  Widget buildMealCard(String timeOfDay, String title, String subtitle,
-      String likes, String imagePath) {
+  String getStringDay(String day) {
+    switch(day) {
+      case 'MON':
+        return 'T2';
+      case 'TUE':
+        return 'T3';
+      case 'WED':
+        return 'T4';
+      case 'THU':
+        return 'T5';
+      case 'FRI':
+        return 'T6';
+      case 'SAT':
+        return 'T7';
+      case 'SUN':
+        return 'CN';
+      default:
+        return 'Hai';
+    }
+  }
+
+  Widget buildMealCard(String timeOfDay, List<Map<String, dynamic>> meals) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,40 +335,34 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             Text(
               timeOfDay,
               style: TextStyle(
-                color: Color(0xFF374A37), // dark green
+                color: Color(0xFF374A37),
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: Text(
-                'Xem thêm',
-                style: TextStyle(
-                  color: Color(0xFF374A37), // dark green
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            // TextButton(
+            //   onPressed: () {},
+            //   child: Text(
+            //     'Xem thêm',
+            //     style: TextStyle(
+            //       color: Color(0xFF374A37),
+            //       fontSize: 16,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
-        Card(
-          margin: EdgeInsets.symmetric(vertical: 8.0),
-          child: ListTile(
-            leading: Image.asset(imagePath,
-                width: 60, height: 60, fit: BoxFit.cover),
-            title: Text(title),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (subtitle.isNotEmpty) Text(subtitle),
-                Text(likes),
-              ],
-            ),
-            trailing: Icon(Icons.edit),
-          ),
-        ),
+        SizedBox(height: 8),
+        ...meals.map((meal) => Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                leading: Image.asset(meal['image'],
+                    width: 60, height: 60, fit: BoxFit.cover),
+                title: Text(meal['title']),
+                subtitle: Text(meal['likes']),
+              ),
+            )),
       ],
     );
   }
