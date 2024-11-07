@@ -10,12 +10,18 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   // TextEditingController để quản lý dữ liệu nhập vào
-  static final TextEditingController _usernameController = TextEditingController();
-  static final TextEditingController _passwordController = TextEditingController();
-  static final TextEditingController _registerUserNameController = TextEditingController();
-  static final TextEditingController _registerEmailController = TextEditingController();
-  static final TextEditingController _registerPasswordController = TextEditingController();
-  static final TextEditingController _registerConfirmPasswordController = TextEditingController();
+  static final TextEditingController _usernameController =
+      TextEditingController();
+  static final TextEditingController _passwordController =
+      TextEditingController();
+  static final TextEditingController _registerUserNameController =
+      TextEditingController();
+  static final TextEditingController _registerEmailController =
+      TextEditingController();
+  static final TextEditingController _registerPasswordController =
+      TextEditingController();
+  static final TextEditingController _registerConfirmPasswordController =
+      TextEditingController();
 
   // Hàm đăng nhập
   Future<void> _login(BuildContext context) async {
@@ -56,6 +62,12 @@ class LoginScreen extends StatelessWidget {
           prefs.setString('userId', verifyData['data']['id']);
           prefs.setString('username', verifyData['data']['username']);
           prefs.setString('email', verifyData['data']['email']);
+          String recipeListString = verifyData['data']['recipeList'];
+          List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
+          List<String> recipeList =
+              recipeListDynamic.map((item) => item.toString()).toList();
+
+          prefs.setStringList('recipeList', recipeList);
           Navigator.of(context).pop();
           Fluttertoast.showToast(
             msg: "Đăng nhập thành công!",

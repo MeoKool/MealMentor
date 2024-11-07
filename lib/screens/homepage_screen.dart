@@ -1,23 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:mealmentor/screens/Setting/profile_screen.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mealmentor/screens/detailsRecipePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class HomePageScreen extends StatefulWidget {
-  const HomePageScreen({Key? key}) : super(key: key);
+  const HomePageScreen({super.key});
 
   @override
   State<HomePageScreen> createState() => _HomePageScreenState();
 }
-class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAliveClientMixin {
+
+class _HomePageScreenState extends State<HomePageScreen>
+    with AutomaticKeepAliveClientMixin {
   String username = '';
   String token = '';
   String email = '';
   String userId = '';
+  List<String> recipeList = [];
+  List<dynamic> recipes = [];
+  List<dynamic> favoriteRecipes = [];
+
   @override
   void initState() {
     super.initState();
+    fetchData();
+  }
+
+  void fetchData() async {
     fetchUserInfo();
+    await fetchRecipes();
+    await fetchFavoriteRecipes();
   }
 
   void fetchUserInfo() async {
@@ -27,340 +42,328 @@ class _HomePageScreenState extends State<HomePageScreen> with AutomaticKeepAlive
       token = prefs.getString('token') ?? '';
       email = prefs.getString('email') ?? '';
       userId = prefs.getString('userId') ?? '';
+      recipeList = prefs.getStringList('recipeList') ?? [];
     });
+  }
+
+  Future<void> fetchRecipes() async {
+    const String apiUrl =
+        'https://meal-mentor.uydev.id.vn/api/Recipe/get-all?PageNumber=1&PageSize=5&orderBy=createDateTime';
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          recipes = data['data']['items'];
+        });
+      }
+    } catch (e) {
+      debugPrint("Exception caught: $e");
+    }
+  }
+
+  Future<void> fetchFavoriteRecipes() async {
+    const String favoriteApiUrl =
+        'https://meal-mentor.uydev.id.vn/api/Recipe/get-all?PageNumber=1&PageSize=10&orderBy=likeQuantity';
+    try {
+      final response = await http.get(Uri.parse(favoriteApiUrl));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          favoriteRecipes = data['data']['items'];
+        });
+      }
+    } catch (e) {
+      print("Exception caught: $e");
+    }
+  }
+
+  Future<void> likeRecipe(int recipeId) async {
+    final String likeApiUrl =
+        'https://meal-mentor.uydev.id.vn/api/User/like-recipe?recipeId=$recipeId';
+    try {
+      final response = await http.post(
+        Uri.parse(likeApiUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: "Đã thêm món ăn yêu thích!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        setState(() {
+          recipeList.add(recipeId.toString());
+        });
+        fetchFavoriteRecipes();
+        await Future.delayed(const Duration(seconds: 1));
+        fetchRecipes();
+      }
+    } catch (e) {
+      print("Exception caught: $e");
+    }
+  }
+
+  Future<void> dislikeRecipe(int recipeId) async {
+    final String dislikeApiUrl =
+        'https://meal-mentor.uydev.id.vn/api/User/dislike-recipe?recipeId=$recipeId';
+    try {
+      final response = await http.post(
+        Uri.parse(dislikeApiUrl),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Fluttertoast.showToast(
+          msg: "Đã xóa món ăn khỏi danh sách yêu thích!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+        setState(() {
+          recipeList.remove(recipeId.toString());
+        });
+        fetchFavoriteRecipes();
+        await Future.delayed(const Duration(seconds: 1));
+        fetchRecipes();
+      } else {
+        Fluttertoast.showToast(
+          msg: "Không thể xóa món ăn khỏi danh sách yêu thích!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      print("Exception caught: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF9DC08B), // Màu nền xanh nhạt
+      backgroundColor: const Color(0xFF9DC08B),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 50),
-            // Lời chào và logo
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "🌞 Chào bạn,",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      username,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-                Image.asset(
-                  'assets/images/logoApp.png', // Logo của bạn
-                  width: 80,
-                  height: 80,
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-            // Phần "Công thức mới hôm nay"
-            const Text(
-              "Công thức mới hôm nay",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            _buildGreetingSection(),
+            const SizedBox(height: 40),
+            _buildSectionTitle("Thực đơn mới hôm nay"),
             const SizedBox(height: 10),
-            SizedBox(
-              height: 180, // Chiều cao của danh sách công thức
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildRecipeCard(
-                    "Mì hải sản chay",
-                    "James Spader",
-                    "20 Min",
-                    'assets/images/recipe1.png',
-                  ),
-                  const SizedBox(width: 10),
-                  _buildRecipeCard(
-                    "Bún chay",
-                    "Olivia Ryan",
-                    "20 Min",
-                    'assets/images/recipe2.png',
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 30),
-            // Phần "Thực đơn hôm nay"
-            const Text(
-              "Thực đơn hôm nay",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            _buildHorizontalRecipeList(recipes),
+            const SizedBox(height: 40),
+            _buildSectionTitle("Món ăn được yêu thích nhất"),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                MealButton(label: "Sáng"),
-                MealButton(label: "Trưa"),
-                MealButton(label: "Chiều"),
-                MealButton(label: "Tối"),
-              ],
-            ),
-            const SizedBox(height: 30),
-            // Phần "Món ăn phổ biến"
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text(
-                  "Món ăn phổ biến",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  "Tất cả",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              childAspectRatio: 0.8,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildPopularMealCard(
-                  "Salad Taco chay",
-                  "120 Kcal",
-                  "20 Min",
-                  'assets/images/recipe1.png',
-                ),
-                _buildPopularMealCard(
-                  "Bánh Pancake Nhật chay",
-                  "64 Kcal",
-                  "12 Min",
-                  'assets/images/recipe2.png',
-                ),
-              ],
-            ),
+            _buildHorizontalRecipeList(favoriteRecipes, isFavorite: true),
             const SizedBox(height: 30),
           ],
         ),
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {},
-      //   backgroundColor: const Color(0xFF609966), // Màu của FAB
-      //   child: const Icon(Icons.restaurant_menu),
-      // ),
-      // bottomNavigationBar: BottomAppBar(
-      //   shape: const CircularNotchedRectangle(),
-      //   notchMargin: 8.0,
-      //   child: Container(
-      //     height: 60,
-      //     decoration: const BoxDecoration(
-      //       color: Color(0xFF609966), // Màu của BottomBar
-      //       borderRadius: BorderRadius.only(
-      //         topLeft: Radius.circular(20),
-      //         topRight: Radius.circular(20),
-      //       ),
-      //     ),
-      //     child: Row(
-      //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //       children: <Widget>[
-      //         IconButton(
-      //           icon: const Icon(Icons.home),
-      //           color: Colors.black,
-      //           onPressed: () {
-      //             Navigator.push(
-      //               context,
-      //               MaterialPageRoute(builder: (context) => const HomePage()),
-      //             );
-      //           },
-      //         ),
-      //         IconButton(
-      //           icon: const Icon(Icons.search),
-      //           color: Colors.black,
-      //           onPressed: () {},
-      //         ),
-      //         const SizedBox(width: 48), // Khoảng trống cho FAB ở giữa
-      //         IconButton(
-      //           icon: const Icon(Icons.notifications),
-      //           color: Colors.black,
-      //           onPressed: () {},
-      //         ),
-      //         IconButton(
-      //           icon: const Icon(Icons.settings),
-      //           color: Colors.black,
-      //           onPressed: () {
-      //             Navigator.push(
-      //               context,
-      //               MaterialPageRoute(
-      //                   builder: (context) => const ProfileScreen()),
-      //             );
-      //           },
-      //         ),
-      //       ],
-      //     ),
-      //   ),
-      // ),
     );
   }
 
-  // Hàm tạo thẻ món ăn phổ biến
-  Widget _buildPopularMealCard(
-      String title, String calories, String time, String imagePath) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
+  Widget _buildGreetingSection() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "🌞 Hello,",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.black87,
+              ),
             ),
-            child: Image.asset(
-              imagePath,
+            Text(
+              username,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade900,
+              ),
+            ),
+          ],
+        ),
+        CircleAvatar(
+          radius: 30,
+          backgroundImage: AssetImage('assets/images/logoApp.png'),
+        ),
+      ],
+    );
+  }
+
+  _buildHorizontalRecipeList(List<dynamic> recipeList,
+      {bool isFavorite = false}) {
+    return SizedBox(
+      height: 300,
+      child: recipeList.isNotEmpty
+          ? ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: recipeList.length,
+              itemBuilder: (context, index) {
+                final recipe = recipeList[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: _buildRecipeCard(
+                    recipe['name'] ?? 'No Name',
+                    recipe['createDateTime'] ?? '',
+                    recipe['calories'] ?? 0,
+                    recipe['likeQuantity'] ?? '0',
+                    recipe['id'],
+                    imageUrl: recipe['image'],
+                  ),
+                );
+              },
+            )
+          : const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: Colors.green.shade900,
+      ),
+    );
+  }
+
+  Widget _buildRecipeCard(String name, String createDateTime, int calories,
+      String likeQuantity, int recipeId,
+      {String? imageUrl}) {
+    bool isLiked = recipeList.contains(recipeId.toString());
+    final String defaultImageUrl =
+        'https://png.pngtree.com/thumb_back/fw800/background/20240229/pngtree-plate-with-vegan-or-vegetarian-food-in-womans-hand-image_15633697.jpg';
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RecipeDetailPageHome(recipeId: recipeId),
+          ),
+        );
+      },
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              blurRadius: 5,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
               height: 100,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+              decoration: BoxDecoration(
+                color: Colors.green.shade100,
+                borderRadius: BorderRadius.circular(15),
+                image: DecorationImage(
+                  image: NetworkImage(
+                    (imageUrl != null &&
+                            imageUrl.isNotEmpty &&
+                            imageUrl != "string" &&
+                            imageUrl != "string")
+                        ? imageUrl
+                        : defaultImageUrl,
                   ),
+                  fit: BoxFit.cover,
                 ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Icon(Icons.local_fire_department, size: 16),
-                    Text(calories),
-                    const Spacer(),
-                    const Icon(Icons.schedule, size: 16),
-                    Text(time),
-                  ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              " ${DateFormat('dd/MM/yyyy').format(DateTime.parse(createDateTime))}",
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.local_fire_department,
+                    color: Colors.orange, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  "$calories kcal",
+                  style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.thumb_up, color: Colors.blueAccent, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  "$likeQuantity likes",
+                  style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
+                ),
+              ],
+            ),
+            const SizedBox(height: 0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.favorite,
+                    color: isLiked ? Colors.red : Colors.grey,
+                  ),
+                  onPressed: () {
+                    if (isLiked) {
+                      dislikeRecipe(recipeId);
+                    } else {
+                      likeRecipe(recipeId);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  // Hàm tạo thẻ công thức
-  Widget _buildRecipeCard(
-      String title, String chef, String time, String imagePath) {
-    return Container(
-      width: 150,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            child: Image.asset(
-              imagePath,
-              height: 80,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(chef),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Icon(Icons.schedule, size: 16),
-                    const SizedBox(width: 5),
-                    Text(time),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
   @override
   bool get wantKeepAlive => true;
-}
-
-// Hàm tạo nút thực đơn
-class MealButton extends StatelessWidget {
-  final String label;
-  const MealButton({required this.label, Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.grey[200],
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          color: Colors.black,
-        ),
-      ),
-    );
-  }
 }
