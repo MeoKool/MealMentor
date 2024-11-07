@@ -255,7 +255,7 @@ class _HomePageScreenState extends State<HomePageScreen>
       {String? imageUrl}) {
     bool isLiked = recipeList.contains(recipeId.toString());
     final String defaultImageUrl =
-        'https://static.vecteezy.com/system/resources/thumbnails/004/141/669/small_2x/no-photo-or-blank-image-icon-loading-images-or-missing-image-mark-image-not-available-or-image-coming-soon-sign-simple-nature-silhouette-in-frame-isolated-illustration-vector.jpg';
+        'https://png.pngtree.com/thumb_back/fw800/background/20240229/pngtree-plate-with-vegan-or-vegetarian-food-in-womans-hand-image_15633697.jpg';
 
     return InkWell(
       onTap: () {
@@ -289,7 +289,14 @@ class _HomePageScreenState extends State<HomePageScreen>
                 color: Colors.green.shade100,
                 borderRadius: BorderRadius.circular(15),
                 image: DecorationImage(
-                  image: NetworkImage(imageUrl ?? defaultImageUrl),
+                  image: NetworkImage(
+                    (imageUrl != null &&
+                            imageUrl.isNotEmpty &&
+                            imageUrl != "string" &&
+                            imageUrl != "string")
+                        ? imageUrl
+                        : defaultImageUrl,
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),

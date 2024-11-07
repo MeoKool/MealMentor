@@ -62,9 +62,11 @@ class LoginScreen extends StatelessWidget {
           prefs.setString('userId', verifyData['data']['id']);
           prefs.setString('username', verifyData['data']['username']);
           prefs.setString('email', verifyData['data']['email']);
-          List<String> recipeList = List<String>.from(json
-              .decode(verifyData['data']['recipeList'])
-              .map((item) => item.toString()));
+          String recipeListString = verifyData['data']['recipeList'];
+          List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
+          List<String> recipeList =
+              recipeListDynamic.map((item) => item.toString()).toList();
+
           prefs.setStringList('recipeList', recipeList);
           Navigator.of(context).pop();
           Fluttertoast.showToast(
