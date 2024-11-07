@@ -77,7 +77,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                   return {
                     'title': meal['name'] ?? 'No Title',
                     'likes': '${meal['likeQuantity'] ?? 0} thích món ăn này',
-                    'image': 'assets/images/recipe1.png',
+                    'image': meal['image'] ?? 'assets/images/recipe1.png',
                   };
                 }).toList(),
               );
@@ -239,7 +239,10 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : (weekMealData[selectedDayIndex]['mealsByTime']?.values.every((mealList) => (mealList as List).isEmpty) ??
+                  : (weekMealData[selectedDayIndex]['mealsByTime']
+                              ?.values
+                              .every(
+                                  (mealList) => (mealList as List).isEmpty) ??
                           true)
                       ? Center(
                           child: Text(
@@ -305,7 +308,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   }
 
   String getStringDay(String day) {
-    switch(day) {
+    switch (day) {
       case 'MON':
         return 'T2';
       case 'TUE':
@@ -357,8 +360,29 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         ...meals.map((meal) => Card(
               margin: EdgeInsets.symmetric(vertical: 8.0),
               child: ListTile(
-                leading: Image.asset(meal['image'],
-                    width: 60, height: 60, fit: BoxFit.cover),
+                leading: meal['image'] != null && meal['image'] != 'string'
+                    ? Image.network(
+                        meal['image'],
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                        errorBuilder: (BuildContext context, Object exception,
+                            StackTrace? stackTrace) {
+                          // Display a fallback image or any other widget you prefer when an error occurs
+                          return Image.asset(
+                            'assets/images/recipe1.png', // fallback image
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        'assets/images/recipe1.png',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
                 title: Text(meal['title']),
                 subtitle: Text(meal['likes']),
               ),
