@@ -35,9 +35,11 @@ class RecipeDetailPage extends StatelessWidget {
                 height: 250,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  image: const DecorationImage(
-                    image: AssetImage(
-                        "assets/images/recipe1.png"), // Use recipe image if available
+                  image: DecorationImage(
+                    image: recipe['image'] != null && recipe['image'].isNotEmpty 
+                    ? NetworkImage(recipe['image'])
+                    : AssetImage("assets/images/recipe1.png")
+                    , // Use recipe image if available
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -57,8 +59,8 @@ class RecipeDetailPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    const Text(
-                      "1100 thích món ăn này", // Replace with actual data if available
+                    Text(
+                      "${recipe['likeQuantity'] ?? '0'} thích món ăn này", // Replace with actual data if available
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ],
@@ -78,7 +80,7 @@ class RecipeDetailPage extends StatelessWidget {
                   children: [
                     // Công thức
                     const Text(
-                      "Công thức:",
+                      "Nguyên liệu:",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -100,7 +102,7 @@ class RecipeDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      recipe['instruction'] ?? "No instructions available",
+                      recipe['instruction'] ?? "Chưa có cách nấu",
                       style:
                           const TextStyle(fontSize: 16, color: Colors.black87),
                     ),

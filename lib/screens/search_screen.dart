@@ -146,7 +146,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               recipe['calories'] != null
                                   ? '${recipe['calories'].toStringAsFixed(2)} calories'
                                   : 'No calories',
-                              'assets/images/recipe1.png'), // Replace with real image URL if available
+                              recipe['image'] ?? 'assets/images/recipe1.png'), // Replace with real image URL if available
                         );
                       },
                     ),
@@ -169,12 +169,22 @@ class _SearchScreenState extends State<SearchScreen> {
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
             ),
-            child: Image.asset(
-              imagePath,
-              height: 100, // You can adjust this height as necessary
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            child: Image.network(
+                        imagePath,
+                        width: double.infinity,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (BuildContext context, Object exception,
+                            StackTrace? stackTrace) {
+                          // Display a fallback image or any other widget you prefer when an error occurs
+                          return Image.asset(
+                            'assets/images/recipe1.png', // fallback image
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
