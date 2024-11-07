@@ -284,7 +284,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            day,
+            getStringDay(day).toString(),
             style: TextStyle(
               color: isSelected ? Colors.white : Colors.black,
               fontSize: 18,
@@ -302,6 +302,27 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         ],
       ),
     );
+  }
+
+  String getStringDay(String day) {
+    switch(day) {
+      case 'MON':
+        return 'T2';
+      case 'TUE':
+        return 'T3';
+      case 'WED':
+        return 'T4';
+      case 'THU':
+        return 'T5';
+      case 'FRI':
+        return 'T6';
+      case 'SAT':
+        return 'T7';
+      case 'SUN':
+        return 'CN';
+      default:
+        return 'Hai';
+    }
   }
 
   Widget buildMealCard(String timeOfDay, List<Map<String, dynamic>> meals) {
