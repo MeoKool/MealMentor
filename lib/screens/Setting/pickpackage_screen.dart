@@ -1,5 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mealmentor/screens/Setting/subscribe.dart';
+import 'package:mealmentor/screens/homepage_screen.dart';
+import 'package:mealmentor/screens/navigation_menu.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:logger/logger.dart';
 
 class PickPackageScreen extends StatefulWidget {
   const PickPackageScreen({Key? key}) : super(key: key);
@@ -9,29 +18,103 @@ class PickPackageScreen extends StatefulWidget {
 }
 
 class _PickPackageScreenState extends State<PickPackageScreen> {
-  String? selectedPackage; 
-  String? selectedPaymentMethod; 
-
+  String token = "";
+  String userId = "";
+  String? selectedPackage;
+  String? selectedPaymentMethod;
+  bool isSubscribed = false;
+  final logger = Logger();
   final List<Package> packages = [
     Package(
         title: 'Gói Cơ Bản',
         description: 'Gói cơ bản cho người mới.',
-        price: '100.000 VND'),
-    Package(
-        title: 'Gói Cao Cấp',
-        description: 'Gói cao cấp với nhiều tính năng.',
-        price: '200.000 VND'),
-    Package(
-        title: 'Gói VIP',
-        description: 'Gói VIP cho những người yêu cầu cao.',
-        price: '500.000 VND'),
+        price: '50.000 VND'),
   ];
 
   final List<String> paymentMethods = [
-    'Thẻ tín dụng',
-    'Chuyển khoản ngân hàng',
-    'Thanh toán khi nhận hàng'
+    'Thanh toán bằng Payos',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedPackage = packages.first.title;
+    selectedPaymentMethod = paymentMethods.first;
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final SharedPreferences pre = await SharedPreferences.getInstance();
+    setState(() {
+      token = pre.getString('token') ?? "";
+      userId = pre.getString('userId') ?? "";
+    });
+    await checkSubscriptionStatus();
+  }
+
+  Future<void> checkSubscriptionStatus() async {
+    final url =
+        Uri.parse('https://meal-mentor.uydev.id.vn/api/User/subcriber-list');
+    final response = await http.get(
+      url,
+      headers: {"Authorization": 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+
+      List subscribers = responseData[
+          'data']; // Assuming 'data' contains a list of subscribers
+
+      setState(() {
+        isSubscribed =
+            subscribers.any((subscriber) => subscriber['userId'] == userId);
+      });
+    } else {
+      _showErrorSnackBar("Failed to check subscription status.");
+    }
+  }
+  
+  Future<void> initiatePayment() async {
+    final url =
+        Uri.parse('https://meal-mentor.uydev.id.vn/api/Payment/create-link');
+    final body = {"amount": 50000, "description": "Subscription Meal Mentor"};
+
+    final response = await http.post(
+      url,
+      headers: {"Authorization": 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['error'] == 0) {
+        final checkoutUrl = responseData['data']['checkoutUrl'];
+        if (kIsWeb) {
+          // If running on web, open the URL in a new tab
+          await launchUrl(Uri.parse(checkoutUrl),
+              mode: LaunchMode.externalApplication);
+        } else {
+          // If running on mobile, navigate to the WebView
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentWebView(url: checkoutUrl),
+            ),
+          );
+        }
+      } else {
+        _showErrorSnackBar(responseData['message']);
+      }
+    } else {
+      _showErrorSnackBar("Failed to initiate payment.");
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +123,10 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
         backgroundColor: const Color(0xFF40513B),
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text('Chọn Gói Đăng Ký',
-            style: TextStyle(color: Colors.white)), 
+            style: TextStyle(color: Colors.white)),
       ),
       body: Container(
-        color: const Color(0xFF9DC08B), 
+        color: const Color(0xFF9DC08B),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,116 +137,129 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white), 
+                  color: Colors.white),
             ),
             const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    if (isSubscribed)
+                      Container(
+                        margin: const EdgeInsets.only(
+                            bottom: 20.0), // Adjust the bottom margin as needed
+                        child: const Text(
+                          'Bạn đã đăng ký gói!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
+                      ),
                     ListView.separated(
                       itemCount: packages.length,
                       separatorBuilder: (context, index) =>
                           const SizedBox(height: 10),
                       shrinkWrap: true,
-                      physics:
-                          NeverScrollableScrollPhysics(), 
+                      physics: NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         final package = packages[index];
                         return Container(
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(
-                                255, 255, 255, 255), 
-                            borderRadius:
-                                BorderRadius.circular(8.0), 
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black
-                                    .withOpacity(0.1), 
+                                color: Colors.black.withOpacity(0.1),
                                 spreadRadius: 2,
                                 blurRadius: 5,
-                                offset: const Offset(
-                                    0, 3), 
+                                offset: const Offset(0, 3),
                               ),
                             ],
                           ),
                           child: RadioListTile<String>(
                             title: Text(package.title,
-                                style: const TextStyle(
-                                    color: Colors.black)), 
+                                style: const TextStyle(color: Colors.black)),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(package.description,
-                                    style: const TextStyle(
-                                        color:
-                                            Colors.black)),
+                                    style:
+                                        const TextStyle(color: Colors.black)),
                                 const SizedBox(height: 5),
                                 Text(
                                   package.price,
                                   style: const TextStyle(
                                       color: Color(0xFF40513B),
-                                      fontWeight: FontWeight
-                                          .bold), 
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                             value: package.title,
-
                             groupValue: selectedPackage,
-                            activeColor: const Color(
-                                0xFF40513B), 
-                            onChanged: (value) {
-                              setState(() {
-                                selectedPackage =
-                                    value; 
-                              });
-                            },
+                            activeColor: const Color(0xFF40513B),
+                            // onChanged: (value) {
+                            //   setState(() {
+                            //     selectedPackage = value;
+                            //   });
+                            // },
+                            onChanged: isSubscribed
+                                ? null // Disable the selection if already subscribed
+                                : (value) {
+                                    setState(() {
+                                      selectedPackage = value;
+                                    });
+                                  },
                           ),
                         );
                       },
                     ),
-                    const Divider(
-                        color: Colors.white), 
+                    const Divider(color: Colors.white),
                     const Text(
                       'Chọn phương thức thanh toán:',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white), 
+                          color: Colors.white),
                     ),
                     const SizedBox(height: 10),
-                    // Payment method selection with radio buttons
                     Column(
                       children: paymentMethods.map((method) {
                         return RadioListTile<String>(
                           title: Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween, 
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                method,
-                                style: const TextStyle(
-                                    color: Colors.white),
-                              ),
-                              Image.asset(
-                                'assets/images/MoMo_Logo.png', 
-                                width: 35,
-                                height: 35, 
-                                fit: BoxFit.contain,
+                              Text(method,
+                                  style: const TextStyle(color: Colors.white)),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.asset(
+                                  'assets/images/payos.png',
+                                  width: 35,
+                                  height: 35,
+                                  fit: BoxFit.contain,
+                                ),
                               ),
                             ],
                           ),
                           value: method,
                           groupValue: selectedPaymentMethod,
-                          activeColor: const Color(
-                              0xFF40513B), 
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod =
-                                  value; 
-                            });
-                          },
+                          activeColor: const Color(0xFF40513B),
+                          // onChanged: (value) {
+                          //   setState(() {
+                          //     selectedPaymentMethod = value;
+                          //   });
+                          // },
+                          onChanged: isSubscribed
+                              ? null // Disable the payment method selection if already subscribed
+                              : (value) {
+                                  setState(() {
+                                    selectedPaymentMethod = value;
+                                  });
+                                },
                         );
                       }).toList(),
                     ),
@@ -171,47 +267,212 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
                 ),
               ),
             ),
-            // Confirm button
             Padding(
               padding: const EdgeInsets.only(top: 16.0),
               child: Center(
-                // Center the button
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (selectedPackage != null &&
-                          selectedPaymentMethod != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SubscriptionScreen(),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Vui lòng chọn gói đăng ký và phương thức thanh toán.'),
-                          ),
-                        );
-                      }
-                    },
+                    onPressed: isSubscribed
+                        ? null // Disable the button if isSubscribed is true
+                        : () {
+                            if (selectedPackage != null &&
+                                selectedPaymentMethod != null) {
+                              initiatePayment();
+                            } else {
+                              _showErrorSnackBar(
+                                  'Vui lòng chọn gói đăng ký và phương thức thanh toán.');
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFF40513B), 
+                      backgroundColor: const Color(0xFF40513B),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        vertical: 16,
-                        horizontal: 100,
-                      ),
+                          vertical: 16, horizontal: 100),
                     ),
                     child: const Text('Xác nhận',
-                        style: TextStyle(color: Colors.white,fontSize: 16)),
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// class PaymentWebView extends StatelessWidget {
+//   final String url;
+
+//   const PaymentWebView({Key? key, required this.url}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Thanh toán"),
+//       ),
+//       body: WebView(
+//         initialUrl: url,
+//         javascriptMode: JavascriptMode.unrestricted,
+//       ),
+//     );
+//   }
+// }
+class PaymentWebView extends StatelessWidget {
+  final String url;
+
+  const PaymentWebView({Key? key, required this.url}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Thanh toán"),
+      ),
+      body: WebView(
+        initialUrl: url,
+        javascriptMode: JavascriptMode.unrestricted,
+        navigationDelegate: (NavigationRequest request) {
+          final uri = Uri.parse(request.url);
+
+          if (uri.queryParameters['status'] == 'CANCELLED') {
+            Navigator.pop(context); // Close WebView
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CancelScreen(),
+              ),
+            );
+            return NavigationDecision.prevent;
+          } else if (uri.queryParameters['status'] == 'PAID') {
+            Navigator.pop(context); // Close WebView
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SuccessScreen(),
+              ),
+            );
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
+      ),
+    );
+  }
+}
+
+// class CancelScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Thanh toán thất bại')),
+//       body: Center(
+//         child: const Text(
+//           'Thanh toán đã bị hủy.',
+//           style: TextStyle(fontSize: 18),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class SuccessScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Thanh toán thành công')),
+//       body: Center(
+//         child: const Text(
+//           'Thanh toán thành công! Cảm ơn bạn.',
+//           style: TextStyle(fontSize: 18),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+class CancelScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Thanh toán thất bại')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cancel, color: Colors.red, size: 80),
+            const SizedBox(height: 20),
+            const Text(
+              'Thanh toán đã bị hủy.',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NavigationMenu()), // Update this to your homepage widget
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
+              child: const Text(
+                'Quay về Trang Chủ',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SuccessScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Thanh toán thành công')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.check_circle, color: Colors.green, size: 80),
+            const SizedBox(height: 20),
+            const Text(
+              'Thanh toán thành công! Cảm ơn bạn.',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NavigationMenu()), // Update this to your homepage widget
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              ),
+              child: const Text(
+                'Quay về Trang Chủ',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
