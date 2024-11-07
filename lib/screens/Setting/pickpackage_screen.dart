@@ -276,6 +276,24 @@ Future<void> initiatePayment() async {
   }
 }
 
+// class PaymentWebView extends StatelessWidget {
+//   final String url;
+
+//   const PaymentWebView({Key? key, required this.url}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text("Thanh toán"),
+//       ),
+//       body: WebView(
+//         initialUrl: url,
+//         javascriptMode: JavascriptMode.unrestricted,
+//       ),
+//     );
+//   }
+// }
 class PaymentWebView extends StatelessWidget {
   final String url;
 
@@ -290,10 +308,65 @@ class PaymentWebView extends StatelessWidget {
       body: WebView(
         initialUrl: url,
         javascriptMode: JavascriptMode.unrestricted,
+        navigationDelegate: (NavigationRequest request) {
+          final uri = Uri.parse(request.url);
+
+          if (uri.queryParameters['status'] == 'CANCELLED') {
+            Navigator.pop(context); // Close WebView
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CancelScreen(),
+              ),
+            );
+            return NavigationDecision.prevent;
+          } else if (uri.queryParameters['status'] == 'PAID') {
+            Navigator.pop(context); // Close WebView
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SuccessScreen(),
+              ),
+            );
+            return NavigationDecision.prevent;
+          }
+          return NavigationDecision.navigate;
+        },
       ),
     );
   }
 }
+
+class CancelScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Thanh toán thất bại')),
+      body: Center(
+        child: const Text(
+          'Thanh toán đã bị hủy.',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
+
+class SuccessScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Thanh toán thành công')),
+      body: Center(
+        child: const Text(
+          'Thanh toán thành công! Cảm ơn bạn.',
+          style: TextStyle(fontSize: 18),
+        ),
+      ),
+    );
+  }
+}
+
 
 class Package {
   final String title;
