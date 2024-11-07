@@ -48,7 +48,7 @@ class _HomePageScreenState extends State<HomePageScreen>
 
   Future<void> fetchRecipes() async {
     const String apiUrl =
-        'https://meal-mentor.uydev.id.vn/api/Recipe/get-all?PageNumber=1&PageSize=5&orderBy=createDateTime';
+        'https://meal-mentor.uydev.id.vn/api/Recipe/get-all?orderBy=CreateDateTime';
     try {
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -65,7 +65,7 @@ class _HomePageScreenState extends State<HomePageScreen>
 
   Future<void> fetchFavoriteRecipes() async {
     const String favoriteApiUrl =
-        'https://meal-mentor.uydev.id.vn/api/Recipe/get-all?PageNumber=1&PageSize=10&orderBy=likeQuantity';
+        'https://meal-mentor.uydev.id.vn/api/Recipe/get-all?orderBy=LikeQuantity';
     try {
       final response = await http.get(Uri.parse(favoriteApiUrl));
 
@@ -250,7 +250,7 @@ class _HomePageScreenState extends State<HomePageScreen>
     );
   }
 
-  Widget _buildRecipeCard(String name, String createDateTime, int calories,
+  _buildRecipeCard(String name, String createDateTime, dynamic calories,
       String likeQuantity, int recipeId,
       {String? imageUrl}) {
     bool isLiked = recipeList.contains(recipeId.toString());
@@ -283,6 +283,7 @@ class _HomePageScreenState extends State<HomePageScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Image container
             Container(
               height: 100,
               decoration: BoxDecoration(
@@ -292,7 +293,6 @@ class _HomePageScreenState extends State<HomePageScreen>
                   image: NetworkImage(
                     (imageUrl != null &&
                             imageUrl.isNotEmpty &&
-                            imageUrl != "string" &&
                             imageUrl != "string")
                         ? imageUrl
                         : defaultImageUrl,
@@ -302,6 +302,7 @@ class _HomePageScreenState extends State<HomePageScreen>
               ),
             ),
             const SizedBox(height: 10),
+            // Recipe name
             Text(
               name,
               maxLines: 1,
@@ -312,18 +313,20 @@ class _HomePageScreenState extends State<HomePageScreen>
               ),
             ),
             const SizedBox(height: 8),
+            // Creation date
             Text(
               " ${DateFormat('dd/MM/yyyy').format(DateTime.parse(createDateTime))}",
               style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
             const SizedBox(height: 8),
+            // Calories display, converting to int if needed
             Row(
               children: [
                 Icon(Icons.local_fire_department,
                     color: Colors.orange, size: 16),
                 const SizedBox(width: 4),
                 Text(
-                  "$calories kcal",
+                  "${calories is double ? calories.toInt() : calories} kcal",
                   style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
                 ),
               ],
