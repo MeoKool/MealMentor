@@ -239,7 +239,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : (weekMealData[selectedDayIndex]['mealsByTime']?.isEmpty ??
+                  : (weekMealData[selectedDayIndex]['mealsByTime']?.values.every((mealList) => (mealList as List).isEmpty) ??
                           true)
                       ? Center(
                           child: Text(
@@ -251,15 +251,16 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                           children: weekMealData[selectedDayIndex]
                                   ['mealsByTime']!
                               .entries
-                              .expand<Widget>((entry) {
+                              .map<Widget>((entry) {
                             String timeOfDay = entry.key;
                             List<Map<String, dynamic>> meals =
                                 List<Map<String, dynamic>>.from(
                                     entry.value ?? []);
-
-                            // Display each meal for the specific time of day
-                            return meals.map(
-                                (meal) => buildMealCard(timeOfDay, [meal]));
+                            if (meals.isNotEmpty) {
+                              return buildMealCard(timeOfDay, meals);
+                            } else {
+                              return SizedBox.shrink();
+                            }
                           }).toList(),
                         ),
             )
@@ -318,19 +319,20 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            TextButton(
-              onPressed: () {},
-              child: Text(
-                'Xem thêm',
-                style: TextStyle(
-                  color: Color(0xFF374A37),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+            // TextButton(
+            //   onPressed: () {},
+            //   child: Text(
+            //     'Xem thêm',
+            //     style: TextStyle(
+            //       color: Color(0xFF374A37),
+            //       fontSize: 16,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
           ],
         ),
+        SizedBox(height: 8),
         ...meals.map((meal) => Card(
               margin: EdgeInsets.symmetric(vertical: 8.0),
               child: ListTile(
@@ -338,7 +340,6 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                     width: 60, height: 60, fit: BoxFit.cover),
                 title: Text(meal['title']),
                 subtitle: Text(meal['likes']),
-                trailing: Icon(Icons.edit),
               ),
             )),
       ],
