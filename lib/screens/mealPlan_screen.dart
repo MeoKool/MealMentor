@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/addMealPlanScreen.dart';
 import 'package:mealmentor/screens/ingredientScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'nutrition_screen.dart';
@@ -26,14 +27,18 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   }
 
   Future<void> fetchUserData() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('token') ?? '';
     });
+
     fetchMealPlanData();
   }
 
   Future<void> fetchMealPlanData() async {
+    setState(() {
+      isLoading = true;
+    });
     const String apiUrl = 'https://meal-mentor.uydev.id.vn/api/PlanDate';
 
     try {
@@ -44,45 +49,59 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
 
-        List<Map<String, dynamic>> meals =
-            List<Map<String, dynamic>>.from(responseData['data'].map((dayData) {
-          return {
-            'day': DateFormat('EEE')
-                .format(DateTime.parse(dayData['planDate']))
-                .toUpperCase(),
-            'date': DateFormat('d').format(DateTime.parse(dayData['planDate'])),
-            'meals': List<Map<String, dynamic>>.from(
-                dayData['details'].map((detail) {
-              final meal = detail['meal'][0];
-              return {
-                'timeOfDay':
-                    detail['type'] == 'morning' ? 'Buổi sáng' : detail['type'],
-                'title': meal['name'],
-                'likes': '${meal['likeQuantity']} thích món ăn này',
-                'image': 'assets/images/recipe1.png',
-              };
-            })),
-          };
-        }));
+        // Map to group meals by date (ignoring time)
+        Map<String, Map<String, List<Map<String, dynamic>>>> mealsByDate = {};
 
-        // Generate the current week's dates
+        for (var dayData in responseData['data']) {
+          // Extract only the date part (yyyy-MM-dd)
+          String dateKey = DateFormat('yyyy-MM-dd')
+              .format(DateTime.parse(dayData['planDate']));
+
+          // Initialize the structure for the day if not already present
+          mealsByDate.putIfAbsent(dateKey,
+              () => {"Buổi sáng": [], "Buổi trưa": [], "Buổi tối": []});
+
+          for (var detail in dayData['details']) {
+            // Determine the time of day
+            String timeOfDay = detail['type'] == 'morning'
+                ? 'Buổi sáng'
+                : detail['type'] == 'noon'
+                    ? 'Buổi trưa'
+                    : 'Buổi tối';
+
+            // Only proceed if the 'meal' list is not empty
+            if (detail['meal'] is List && (detail['meal'] as List).isNotEmpty) {
+              // Safely add meals to the timeOfDay list
+              mealsByDate[dateKey]![timeOfDay]!.addAll(
+                (detail['meal'] as List).map<Map<String, dynamic>>((meal) {
+                  return {
+                    'title': meal['name'] ?? 'No Title',
+                    'likes': '${meal['likeQuantity'] ?? 0} thích món ăn này',
+                    'image': 'assets/images/recipe1.png',
+                  };
+                }).toList(),
+              );
+            }
+          }
+        }
+
+        // Generate the current week's dates and populate `weekMealData` based on `mealsByDate`
         DateTime now = DateTime.now();
         DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         weekMealData = List.generate(7, (index) {
           DateTime day = startOfWeek.add(Duration(days: index));
           String dayName = DateFormat('EEE').format(day).toUpperCase();
           String dayDate = DateFormat('d').format(day);
+          String dateKey = DateFormat('yyyy-MM-dd').format(day);
 
-          // Find meal data for the current day if available
-          Map<String, dynamic>? dayData = meals.firstWhere(
-            (meal) => meal['day'] == dayName && meal['date'] == dayDate,
-            orElse: () => {'day': dayName, 'date': dayDate, 'meals': []},
-          );
+          // Find meals for the current day if available, otherwise set empty meals
+          Map<String, dynamic>? dayData = mealsByDate[dateKey] ??
+              {"Buổi sáng": [], "Buổi trưa": [], "Buổi tối": []};
 
           return {
             'day': dayName,
             'date': dayDate,
-            'meals': dayData['meals'], // Will be empty if no data is found
+            'mealsByTime': dayData,
           };
         });
 
@@ -190,10 +209,38 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               ),
             ),
             SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AddMealPlanScreen()),
+                    );
+                    if (result == true) {
+                      fetchMealPlanData();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFF374A37),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    'Thêm thực đơn',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : weekMealData[selectedDayIndex]['meals'].isEmpty
+                  : (weekMealData[selectedDayIndex]['mealsByTime']?.isEmpty ??
+                          true)
                       ? Center(
                           child: Text(
                             'Không có dữ liệu',
@@ -201,18 +248,21 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                           ),
                         )
                       : ListView(
-                          children: weekMealData[selectedDayIndex]['meals']
-                              .map<Widget>((meal) {
-                            return buildMealCard(
-                              meal['timeOfDay'],
-                              meal['title'],
-                              '',
-                              meal['likes'],
-                              meal['image'],
-                            );
+                          children: weekMealData[selectedDayIndex]
+                                  ['mealsByTime']!
+                              .entries
+                              .expand<Widget>((entry) {
+                            String timeOfDay = entry.key;
+                            List<Map<String, dynamic>> meals =
+                                List<Map<String, dynamic>>.from(
+                                    entry.value ?? []);
+
+                            // Display each meal for the specific time of day
+                            return meals.map(
+                                (meal) => buildMealCard(timeOfDay, [meal]));
                           }).toList(),
                         ),
-            ),
+            )
           ],
         ),
       ),
@@ -253,9 +303,9 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
     );
   }
 
-  Widget buildMealCard(String timeOfDay, String title, String subtitle,
-      String likes, String imagePath) {
+  Widget buildMealCard(String timeOfDay, List<Map<String, dynamic>> meals) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -281,22 +331,16 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
             ),
           ],
         ),
-        Card(
-          margin: EdgeInsets.symmetric(vertical: 8.0),
-          child: ListTile(
-            leading: Image.asset(imagePath,
-                width: 60, height: 60, fit: BoxFit.cover),
-            title: Text(title),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (subtitle.isNotEmpty) Text(subtitle),
-                Text(likes),
-              ],
-            ),
-            trailing: Icon(Icons.edit),
-          ),
-        ),
+        ...meals.map((meal) => Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0),
+              child: ListTile(
+                leading: Image.asset(meal['image'],
+                    width: 60, height: 60, fit: BoxFit.cover),
+                title: Text(meal['title']),
+                subtitle: Text(meal['likes']),
+                trailing: Icon(Icons.edit),
+              ),
+            )),
       ],
     );
   }
