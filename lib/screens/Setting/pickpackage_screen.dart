@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:logger/logger.dart';
 
 class PickPackageScreen extends StatefulWidget {
   const PickPackageScreen({Key? key}) : super(key: key);
@@ -18,9 +19,11 @@ class PickPackageScreen extends StatefulWidget {
 
 class _PickPackageScreenState extends State<PickPackageScreen> {
   String token = "";
+  String userId = "";
   String? selectedPackage;
   String? selectedPaymentMethod;
-
+  bool isSubscribed = false;
+  final logger = Logger();
   final List<Package> packages = [
     Package(
         title: 'Gói Cơ Bản',
@@ -44,75 +47,69 @@ class _PickPackageScreenState extends State<PickPackageScreen> {
     final SharedPreferences pre = await SharedPreferences.getInstance();
     setState(() {
       token = pre.getString('token') ?? "";
+      userId = pre.getString('userId') ?? "";
     });
+    await checkSubscriptionStatus();
   }
 
-  // Future<void> initiatePayment() async {
-  //   final url =
-  //       Uri.parse('https://meal-mentor.uydev.id.vn/api/Payment/create-link');
-  //   final body = {"amount": 50000, "description": "Subscription Meal Mentor"};
+  Future<void> checkSubscriptionStatus() async {
+    final url =
+        Uri.parse('https://meal-mentor.uydev.id.vn/api/User/subcriber-list');
+    final response = await http.get(
+      url,
+      headers: {"Authorization": 'Bearer $token'},
+    );
 
-  //   final response = await http.post(
-  //     url,
-  //     headers: {"Authorization": 'Bearer $token'},
-  //   );
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
 
-  //   if (response.statusCode == 200) {
-  //     final responseData = json.decode(response.body);
-  //     if (responseData['error'] == 0) {
-  //       final checkoutUrl = responseData['data']['checkoutUrl'];
-  //       if (kIsWeb) {
-  //         // If running on web, open the URL in a new tab
-  //         await launchUrl(Uri.parse(checkoutUrl), mode: LaunchMode.externalApplication);
-  //       } else {
-  //         // If running on mobile, navigate to the WebView
-  //         Navigator.push(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => PaymentWebView(url: checkoutUrl),
-  //           ),
-  //         );
-  //       }
-  //     } else {
-  //       _showErrorSnackBar(responseData['message']);
-  //     }
-  //   } else {
-  //     _showErrorSnackBar("Failed to initiate payment.");
-  //   }
-  // }
-Future<void> initiatePayment() async {
-  final url =
-      Uri.parse('https://meal-mentor.uydev.id.vn/api/Payment/create-link');
-  final body = {"amount": 50000, "description": "Subscription Meal Mentor"};
+      List subscribers = responseData[
+          'data']; // Assuming 'data' contains a list of subscribers
 
-  final response = await http.post(
-    url,
-    headers: {"Authorization": 'Bearer $token'},
-  );
+      setState(() {
+        isSubscribed =
+            subscribers.any((subscriber) => subscriber['userId'] == userId);
+      });
+    } else {
+      _showErrorSnackBar("Failed to check subscription status.");
+    }
+  }
+  
+  Future<void> initiatePayment() async {
+    final url =
+        Uri.parse('https://meal-mentor.uydev.id.vn/api/Payment/create-link');
+    final body = {"amount": 50000, "description": "Subscription Meal Mentor"};
 
-  if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
-    if (responseData['error'] == 0) {
-      final checkoutUrl = responseData['data']['checkoutUrl'];
-      if (kIsWeb) {
-        // If running on web, open the URL in a new tab
-        await launchUrl(Uri.parse(checkoutUrl), mode: LaunchMode.externalApplication);
+    final response = await http.post(
+      url,
+      headers: {"Authorization": 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['error'] == 0) {
+        final checkoutUrl = responseData['data']['checkoutUrl'];
+        if (kIsWeb) {
+          // If running on web, open the URL in a new tab
+          await launchUrl(Uri.parse(checkoutUrl),
+              mode: LaunchMode.externalApplication);
+        } else {
+          // If running on mobile, navigate to the WebView
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentWebView(url: checkoutUrl),
+            ),
+          );
+        }
       } else {
-        // If running on mobile, navigate to the WebView
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PaymentWebView(url: checkoutUrl),
-          ),
-        );
+        _showErrorSnackBar(responseData['message']);
       }
     } else {
-      _showErrorSnackBar(responseData['message']);
+      _showErrorSnackBar("Failed to initiate payment.");
     }
-  } else {
-    _showErrorSnackBar("Failed to initiate payment.");
   }
-}
+
   void _showErrorSnackBar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -147,6 +144,21 @@ Future<void> initiatePayment() async {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    if (isSubscribed)
+                      Container(
+                        margin: const EdgeInsets.only(
+                            bottom: 20.0), // Adjust the bottom margin as needed
+                        child: const Text(
+                          'Bạn đã đăng ký gói!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                            fontFamily: 'Roboto',
+                          ),
+                        ),
+                      ),
                     ListView.separated(
                       itemCount: packages.length,
                       separatorBuilder: (context, index) =>
@@ -189,11 +201,18 @@ Future<void> initiatePayment() async {
                             value: package.title,
                             groupValue: selectedPackage,
                             activeColor: const Color(0xFF40513B),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedPackage = value;
-                              });
-                            },
+                            // onChanged: (value) {
+                            //   setState(() {
+                            //     selectedPackage = value;
+                            //   });
+                            // },
+                            onChanged: isSubscribed
+                                ? null // Disable the selection if already subscribed
+                                : (value) {
+                                    setState(() {
+                                      selectedPackage = value;
+                                    });
+                                  },
                           ),
                         );
                       },
@@ -229,11 +248,18 @@ Future<void> initiatePayment() async {
                           value: method,
                           groupValue: selectedPaymentMethod,
                           activeColor: const Color(0xFF40513B),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPaymentMethod = value;
-                            });
-                          },
+                          // onChanged: (value) {
+                          //   setState(() {
+                          //     selectedPaymentMethod = value;
+                          //   });
+                          // },
+                          onChanged: isSubscribed
+                              ? null // Disable the payment method selection if already subscribed
+                              : (value) {
+                                  setState(() {
+                                    selectedPaymentMethod = value;
+                                  });
+                                },
                         );
                       }).toList(),
                     ),
@@ -247,15 +273,17 @@ Future<void> initiatePayment() async {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (selectedPackage != null &&
-                          selectedPaymentMethod != null) {
-                        initiatePayment();
-                      } else {
-                        _showErrorSnackBar(
-                            'Vui lòng chọn gói đăng ký và phương thức thanh toán.');
-                      }
-                    },
+                    onPressed: isSubscribed
+                        ? null // Disable the button if isSubscribed is true
+                        : () {
+                            if (selectedPackage != null &&
+                                selectedPaymentMethod != null) {
+                              initiatePayment();
+                            } else {
+                              _showErrorSnackBar(
+                                  'Vui lòng chọn gói đăng ký và phương thức thanh toán.');
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF40513B),
                       shape: RoundedRectangleBorder(
@@ -368,7 +396,6 @@ class PaymentWebView extends StatelessWidget {
 //   }
 // }
 
-
 class CancelScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -389,13 +416,16 @@ class CancelScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => NavigationMenu()), // Update this to your homepage widget
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NavigationMenu()), // Update this to your homepage widget
                   (route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               ),
               child: const Text(
                 'Quay về Trang Chủ',
@@ -429,13 +459,16 @@ class SuccessScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => NavigationMenu()), // Update this to your homepage widget
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          NavigationMenu()), // Update this to your homepage widget
                   (route) => false,
                 );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               ),
               child: const Text(
                 'Quay về Trang Chủ',
