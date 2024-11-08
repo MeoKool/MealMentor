@@ -191,12 +191,31 @@ class _AddMealPlanScreenState extends State<AddMealPlanScreen> {
                               padding: EdgeInsets.all(10),
                               child: Row(
                                 children: [
-                                  Image.asset(
-                                    'assets/images/recipe1.png',
-                                    width: 80,
-                                    height: 80,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  recipe['image'] != null &&
+                                          recipe['image'] != ''
+                                      ? Image.network(
+                                          recipe['image'],
+                                          width: 80,
+                                          height: 80,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (BuildContext context,
+                                              Object exception,
+                                              StackTrace? stackTrace) {
+                                            // Display a fallback image or any other widget you prefer when an error occurs
+                                            return Image.asset(
+                                              'assets/images/recipe1.png', // fallback image
+                                              width: 80,
+                                              height: 80,
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
+                                        )
+                                      : Image.asset(
+                                          'assets/images/recipe1.png',
+                                          width: 80,
+                                          height: 80,
+                                          fit: BoxFit.cover,
+                                        ),
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
@@ -208,9 +227,9 @@ class _AddMealPlanScreenState extends State<AddMealPlanScreen> {
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                              ),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
                                         ),
                                         Text(
                                           recipe['description'] ?? '',
