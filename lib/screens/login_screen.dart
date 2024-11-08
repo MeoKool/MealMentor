@@ -58,15 +58,16 @@ class LoginScreen extends StatelessWidget {
             });
 
         if (verifyResponse.statusCode == 200) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
           var verifyData = jsonDecode(verifyResponse.body);
-          prefs.setString('userId', verifyData['data']['id']);
-          prefs.setString('username', verifyData['data']['username']);
-          prefs.setString('email', verifyData['data']['email']);
-          String recipeListString = verifyData['data']['recipeList'] ?? '[]';
+          prefs.setString('userId', verifyData['data']['info']['id']);
+          prefs.setString('username', verifyData['data']['info']['username']);
+          prefs.setString('email', verifyData['data']['info']['email']);
+          String recipeListString =
+              verifyData['data']['info']['recipeList'] ?? '[]';
           List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
           List<String> recipeList =
               recipeListDynamic.map((item) => item.toString()).toList();
-
           prefs.setStringList('recipeList', recipeList);
           Navigator.of(context).pop();
           Fluttertoast.showToast(
