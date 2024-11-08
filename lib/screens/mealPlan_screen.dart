@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mealmentor/screens/addMealPlanScreen.dart';
+import 'package:mealmentor/screens/detailsRecipePage.dart';
 import 'package:mealmentor/screens/ingredientScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'nutrition_screen.dart';
@@ -75,6 +76,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
               mealsByDate[dateKey]![timeOfDay]!.addAll(
                 (detail['meal'] as List).map<Map<String, dynamic>>((meal) {
                   return {
+                    'id': meal['id'] ?? 0,
                     'title': meal['name'] ?? 'No Title',
                     'likes': '${meal['likeQuantity'] ?? 0} thích món ăn này',
                     'image': meal['image'] ?? 'assets/images/recipe1.png',
@@ -360,6 +362,20 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         ...meals.map((meal) => Card(
               margin: EdgeInsets.symmetric(vertical: 8.0),
               child: ListTile(
+                onTap: () {
+                  print(meal);
+                  if (meal.containsKey('id')) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            RecipeDetailPageHome(recipeId: meal['id']),
+                      ),
+                    );
+                  } else {
+                    print("Meal ID not found");
+                  }
+                },
                 leading: meal['image'] != null && meal['image'] != 'string'
                     ? Image.network(
                         meal['image'],
@@ -368,7 +384,6 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                         fit: BoxFit.cover,
                         errorBuilder: (BuildContext context, Object exception,
                             StackTrace? stackTrace) {
-                          // Display a fallback image or any other widget you prefer when an error occurs
                           return Image.asset(
                             'assets/images/recipe1.png', // fallback image
                             width: 60,

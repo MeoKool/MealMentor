@@ -85,8 +85,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPageHome> {
                           height: 250,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
-                            image: const DecorationImage(
-                              image: AssetImage("assets/images/recipe1.png"),
+                            image: DecorationImage(
+                              image: NetworkImage(recipe?['image'] ??
+                                  "https://via.placeholder.com/250"),
                               fit: BoxFit.cover,
                             ),
                           ),
