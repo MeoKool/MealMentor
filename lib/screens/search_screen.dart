@@ -172,15 +172,15 @@ class _SearchScreenState extends State<SearchScreen> {
             child: Image.network(
                         imagePath,
                         width: double.infinity,
-                        height: 100,
+                        height: 110,
                         fit: BoxFit.cover,
                         errorBuilder: (BuildContext context, Object exception,
                             StackTrace? stackTrace) {
                           // Display a fallback image or any other widget you prefer when an error occurs
                           return Image.asset(
                             'assets/images/recipe1.png', // fallback image
-                            width: 60,
-                            height: 60,
+                            width: double.infinity,
+                            height: 110,
                             fit: BoxFit.cover,
                           );
                         },
