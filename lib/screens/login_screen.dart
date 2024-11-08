@@ -63,6 +63,7 @@ class LoginScreen extends StatelessWidget {
           prefs.setString('userId', verifyData['data']['info']['id']);
           prefs.setString('username', verifyData['data']['info']['username']);
           prefs.setString('email', verifyData['data']['info']['email']);
+          prefs.setBool('subcribe', verifyData['data']['subcribe']);
           String recipeListString =
               verifyData['data']['info']['recipeList'] ?? '[]';
           List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
