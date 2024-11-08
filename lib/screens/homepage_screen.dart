@@ -256,7 +256,6 @@ class _HomePageScreenState extends State<HomePageScreen>
     bool isLiked = recipeList.contains(recipeId.toString());
     final String defaultImageUrl =
         'https://png.pngtree.com/thumb_back/fw800/background/20240229/pngtree-plate-with-vegan-or-vegetarian-food-in-womans-hand-image_15633697.jpg';
-
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -291,9 +290,7 @@ class _HomePageScreenState extends State<HomePageScreen>
                 borderRadius: BorderRadius.circular(15),
                 image: DecorationImage(
                   image: NetworkImage(
-                    (imageUrl != null &&
-                            imageUrl.isNotEmpty &&
-                            imageUrl != "string")
+                    (imageUrl != null && imageUrl.isNotEmpty)
                         ? imageUrl
                         : defaultImageUrl,
                   ),

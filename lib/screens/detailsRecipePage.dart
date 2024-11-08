@@ -107,7 +107,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPageHome> {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                "${recipe?['likeQuantity'] ?? 0} thích món ăn này",
+                                "${recipe?['likeQuantity'] ?? 0} lượt thích",
                                 style: const TextStyle(
                                     fontSize: 16, color: Colors.white),
                               ),
