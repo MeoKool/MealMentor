@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mealmentor/screens/Setting/pickpackage_screen.dart';
 import 'package:mealmentor/screens/detailsRecipePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +23,7 @@ class _HomePageScreenState extends State<HomePageScreen>
   List<String> recipeList = [];
   List<dynamic> recipes = [];
   List<dynamic> favoriteRecipes = [];
-
+  bool subcribe = false;
   @override
   void initState() {
     super.initState();
@@ -43,6 +44,7 @@ class _HomePageScreenState extends State<HomePageScreen>
       email = prefs.getString('email') ?? '';
       userId = prefs.getString('userId') ?? '';
       recipeList = prefs.getStringList('recipeList') ?? [];
+      subcribe = prefs.getBool('subcribe') ?? false;
     });
   }
 
@@ -81,6 +83,18 @@ class _HomePageScreenState extends State<HomePageScreen>
   }
 
   Future<void> likeRecipe(int recipeId) async {
+    if (!subcribe) {
+      Fluttertoast.showToast(
+        msg: "Bạn phải nâng cấp mới được sử dụng tính năng này",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
     final String likeApiUrl =
         'https://meal-mentor.uydev.id.vn/api/User/like-recipe?recipeId=$recipeId';
     try {
@@ -113,6 +127,18 @@ class _HomePageScreenState extends State<HomePageScreen>
   }
 
   Future<void> dislikeRecipe(int recipeId) async {
+    if (!subcribe) {
+      Fluttertoast.showToast(
+        msg: "Bạn phải nâng cấp mới được sử dụng tính năng này",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+      return;
+    }
+
     final String dislikeApiUrl =
         'https://meal-mentor.uydev.id.vn/api/User/dislike-recipe?recipeId=$recipeId';
     try {
@@ -165,7 +191,9 @@ class _HomePageScreenState extends State<HomePageScreen>
           children: [
             const SizedBox(height: 50),
             _buildGreetingSection(),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
+            _buildUpgradeBanner(context), // Add the upgrade banner here
+            const SizedBox(height: 20),
             _buildSectionTitle("Thực đơn mới hôm nay"),
             const SizedBox(height: 10),
             _buildHorizontalRecipeList(recipes),
@@ -174,6 +202,45 @@ class _HomePageScreenState extends State<HomePageScreen>
             const SizedBox(height: 10),
             _buildHorizontalRecipeList(favoriteRecipes, isFavorite: true),
             const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUpgradeBanner(BuildContext context) {
+    if (subcribe) {
+      return const SizedBox.shrink();
+    }
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => PickPackageScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+        margin: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: Colors.orangeAccent,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: const [
+            Expanded(
+              child: Text(
+                "Nâng cấp để trải nghiệm tối đa",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            Icon(Icons.arrow_forward, color: Colors.white),
           ],
         ),
       ),
