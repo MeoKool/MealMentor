@@ -30,9 +30,9 @@ class LoginScreen extends StatelessWidget {
         builder: (context) {
           return const Center(child: CircularProgressIndicator());
         });
+
     final String apiUrl = 'https://meal-mentor.uydev.id.vn/api/Account/login';
 
-    // Tạo dữ liệu đăng nhập
     final Map<String, dynamic> loginData = {
       "email": _usernameController.text.trim(),
       "password": _passwordController.text,
@@ -52,38 +52,49 @@ class LoginScreen extends StatelessWidget {
         prefs.setString('token', accessToken);
 
         final verifyResponse = await http.get(
-            Uri.parse('https://meal-mentor.uydev.id.vn/api/Account/me'),
-            headers: {
-              'Authorization': 'Bearer $accessToken',
-            });
+          Uri.parse('https://meal-mentor.uydev.id.vn/api/Account/me'),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+          },
+        );
 
         if (verifyResponse.statusCode == 200) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
           var verifyData = jsonDecode(verifyResponse.body);
-          prefs.setString('userId', verifyData['data']['info']['id']);
-          prefs.setString('username', verifyData['data']['info']['username']);
-          prefs.setString('email', verifyData['data']['info']['email']);
-          prefs.setBool('subcribe', verifyData['data']['subcribe']);
-          String recipeListString =
-              verifyData['data']['info']['recipeList'] ?? '[]';
-          List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
-          List<String> recipeList =
-              recipeListDynamic.map((item) => item.toString()).toList();
-          prefs.setStringList('recipeList', recipeList);
+
+          if (verifyData['isSuccess'] == true) {
+            prefs.setString('userId', verifyData['data']['id']);
+            prefs.setString('username', verifyData['data']['username']);
+            prefs.setString('email', verifyData['data']['email']);
+            prefs.setString('role', verifyData['data']['role']);
+            prefs.setString('status', verifyData['data']['status']);
+            prefs.setStringList(
+                'likedRecipes',
+                (verifyData['data']['likedRecipes'] as List<dynamic>)
+                    .map((item) => item.toString())
+                    .toList());
+
+            Navigator.of(context).pop();
+            Fluttertoast.showToast(
+              msg: "Đăng nhập thành công!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NavigationMenu()),
+            );
+          } else {
+            Navigator.of(context).pop();
+            _showDialog(context, "Lỗi", verifyData['message']);
+          }
+        } else {
           Navigator.of(context).pop();
-          Fluttertoast.showToast(
-            msg: "Đăng nhập thành công!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => NavigationMenu()),
-          );
+          _showDialog(
+              context, "Lỗi", "Không thể xác minh thông tin người dùng.");
         }
       } else {
         Navigator.of(context).pop();
@@ -91,6 +102,7 @@ class LoginScreen extends StatelessWidget {
             "Vui lòng kiểm tra lại thông tin đăng nhập.");
       }
     } catch (e) {
+      Navigator.of(context).pop();
       _showDialog(context, "Lỗi", "Không thể kết nối đến máy chủ.");
     }
   }
