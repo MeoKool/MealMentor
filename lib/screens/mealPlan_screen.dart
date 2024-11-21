@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mealmentor/screens/Setting/pickpackage_screen.dart';
 import 'package:mealmentor/screens/addMealPlanScreen.dart';
 import 'package:mealmentor/screens/detailsRecipePage.dart';
 import 'package:mealmentor/screens/ingredientScreen.dart';
@@ -20,11 +21,18 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   List<Map<String, dynamic>> weekMealData = [];
   String token = '';
   bool isLoading = true;
-
+  bool subcribe = false;
   @override
   void initState() {
     super.initState();
     fetchUserData();
+  }
+
+  void fetchUserInfo() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      subcribe = prefs.getBool('subcribe') ?? false;
+    });
   }
 
   Future<void> fetchUserData() async {
@@ -128,9 +136,9 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFFB5D6A0),
+        backgroundColor: const Color(0xFFB5D6A0),
         elevation: 0,
-        title: Text(
+        title: const Text(
           'Thực đơn hàng ngày',
           style: TextStyle(
             color: Color(0xFF374A37),
@@ -140,137 +148,188 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        color: Color(0xFFB5D6A0),
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => NutritionScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Text(
-                    'Dinh dưỡng trong ngày',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => IngredientScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Text(
-                    'Nguyên liệu',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(weekMealData.length, (index) {
-                  return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedDayIndex = index;
-                          });
+        color: const Color(0xFFB5D6A0),
+        padding: const EdgeInsets.all(16.0),
+        child: subcribe
+            ? Column(
+                children: [
+                  // Buttons at the top
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NutritionScreen()),
+                          );
                         },
-                        child: buildDateButton(
-                          weekMealData[index]['day'],
-                          weekMealData[index]['date'],
-                          index == selectedDayIndex,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF374A37),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
-                      ));
-                }),
+                        child: const Text(
+                          'Dinh dưỡng trong ngày',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => IngredientScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF374A37),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text(
+                          'Nguyên liệu',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Date selection
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(weekMealData.length, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedDayIndex = index;
+                              });
+                            },
+                            child: buildDateButton(
+                              weekMealData[index]['day'],
+                              weekMealData[index]['date'],
+                              index == selectedDayIndex,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const AddMealPlanScreen()),
+                          );
+                          if (result == true) {
+                            fetchMealPlanData();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF374A37),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text(
+                          'Thêm thực đơn',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Expanded(
+                    child: isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : (weekMealData[selectedDayIndex]['mealsByTime']
+                                    ?.values
+                                    .every((mealList) =>
+                                        (mealList as List).isEmpty) ??
+                                true)
+                            ? const Center(
+                                child: Text(
+                                  'Không có dữ liệu',
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.grey),
+                                ),
+                              )
+                            : ListView(
+                                children: weekMealData[selectedDayIndex]
+                                        ['mealsByTime']!
+                                    .entries
+                                    .map<Widget>((entry) {
+                                  String timeOfDay = entry.key;
+                                  List<Map<String, dynamic>> meals =
+                                      List<Map<String, dynamic>>.from(
+                                          entry.value ?? []);
+                                  if (meals.isNotEmpty) {
+                                    return buildMealCard(timeOfDay, meals);
+                                  } else {
+                                    return const SizedBox.shrink();
+                                  }
+                                }).toList(),
+                              ),
+                  )
+                ],
+              )
+            : buildUpgradePrompt(), // Show the upgrade prompt if not subscribed
+      ),
+    );
+  }
+
+  Widget buildUpgradePrompt() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            "Vui lòng nâng cấp để mở khoá tính năng này",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () {
+              // Handle the upgrade action
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const PickPackageScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => AddMealPlanScreen()),
-                    );
-                    if (result == true) {
-                      fetchMealPlanData();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF374A37),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Text(
-                    'Thêm thực đơn',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
+            child: const Text(
+              "Nâng cấp ngay",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
             ),
-            Expanded(
-              child: isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : (weekMealData[selectedDayIndex]['mealsByTime']
-                              ?.values
-                              .every(
-                                  (mealList) => (mealList as List).isEmpty) ??
-                          true)
-                      ? Center(
-                          child: Text(
-                            'Không có dữ liệu',
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          ),
-                        )
-                      : ListView(
-                          children: weekMealData[selectedDayIndex]
-                                  ['mealsByTime']!
-                              .entries
-                              .map<Widget>((entry) {
-                            String timeOfDay = entry.key;
-                            List<Map<String, dynamic>> meals =
-                                List<Map<String, dynamic>>.from(
-                                    entry.value ?? []);
-                            if (meals.isNotEmpty) {
-                              return buildMealCard(timeOfDay, meals);
-                            } else {
-                              return SizedBox.shrink();
-                            }
-                          }).toList(),
-                        ),
-            )
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

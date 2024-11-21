@@ -99,7 +99,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPageHome> {
                           child: Column(
                             children: [
                               Text(
-                                recipe?['name'] ?? "No name",
+                                recipe?['translatedName'] ?? "No name",
                                 style: const TextStyle(
                                   fontSize: 22,
                                   color: Colors.white,

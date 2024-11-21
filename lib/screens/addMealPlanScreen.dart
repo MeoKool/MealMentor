@@ -223,7 +223,7 @@ class _AddMealPlanScreenState extends State<AddMealPlanScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          recipe['name'],
+                                          recipe['translatedName'] ?? '',
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -238,7 +238,7 @@ class _AddMealPlanScreenState extends State<AddMealPlanScreen> {
                                           style: TextStyle(color: Colors.grey),
                                         ),
                                         Text(
-                                          "${recipe['likeQuantity']} yêu thích",
+                                          "${recipe['likeQuantity'] ?? 0} yêu thích",
                                           style: TextStyle(
                                               fontSize: 12, color: Colors.grey),
                                         ),
