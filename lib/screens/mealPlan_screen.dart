@@ -77,7 +77,7 @@ class _MealPlanScreenState extends State<MealPlanScreen> {
                 (detail['meal'] as List).map<Map<String, dynamic>>((meal) {
                   return {
                     'id': meal['id'] ?? 0,
-                    'title': meal['name'] ?? 'No Title',
+                    'title': meal['translatedName'] ?? 'No Title',
                     'likes': '${meal['likeQuantity'] ?? 0} thích món ăn này',
                     'image': meal['image'] ?? 'assets/images/recipe1.png',
                   };
