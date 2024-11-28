@@ -36,10 +36,10 @@ class RecipeDetailPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   image: DecorationImage(
-                    image: recipe['image'] != null && recipe['image'].isNotEmpty 
-                    ? NetworkImage(recipe['image'])
-                    : AssetImage("assets/images/recipe1.png")
-                    , // Use recipe image if available
+                    image: recipe['image'] != null && recipe['image'].isNotEmpty
+                        ? NetworkImage(recipe['image'])
+                        : AssetImage(
+                            "assets/images/recipe1.png"), // Use recipe image if available
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -51,7 +51,7 @@ class RecipeDetailPage extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      recipe['name'] ?? "No name",
+                      recipe['translatedName'] ?? "No name",
                       style: const TextStyle(
                         fontSize: 22,
                         color: Colors.white,

@@ -142,11 +142,12 @@ class _SearchScreenState extends State<SearchScreen> {
                             );
                           },
                           child: _buildRecipeCard(
-                              recipe['name'] ?? 'No name',
+                              recipe['translatedName'] ?? 'No name',
                               recipe['calories'] != null
                                   ? '${recipe['calories'].toStringAsFixed(2)} calories'
                                   : 'No calories',
-                              recipe['image'] ?? 'assets/images/recipe1.png'), // Replace with real image URL if available
+                              recipe['image'] ??
+                                  'assets/images/recipe1.png'), // Replace with real image URL if available
                         );
                       },
                     ),
@@ -170,49 +171,49 @@ class _SearchScreenState extends State<SearchScreen> {
               topRight: Radius.circular(20),
             ),
             child: Image.network(
-                        imagePath,
-                        width: double.infinity,
-                        height: 110,
-                        fit: BoxFit.cover,
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          // Display a fallback image or any other widget you prefer when an error occurs
-                          return Image.asset(
-                            'assets/images/recipe1.png', // fallback image
-                            width: double.infinity,
-                            height: 110,
-                            fit: BoxFit.cover,
-                          );
-                        },
-                      ),
+              imagePath,
+              width: double.infinity,
+              height: 110,
+              fit: BoxFit.cover,
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                // Display a fallback image or any other widget you prefer when an error occurs
+                return Image.asset(
+                  'assets/images/recipe1.png', // fallback image
+                  width: double.infinity,
+                  height: 110,
+                  fit: BoxFit.cover,
+                );
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 5),
-                  Text(price, style: const TextStyle(fontSize: 14)),
-                  const SizedBox(height: 5),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Icon(
-                      Icons.favorite_border,
-                      color: Colors.grey[400],
-                    ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 5),
+                Text(price, style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 5),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Icon(
+                    Icons.favorite_border,
+                    color: Colors.grey[400],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
         ],
       ),
     );

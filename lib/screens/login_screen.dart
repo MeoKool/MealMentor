@@ -51,6 +51,7 @@ class LoginScreen extends StatelessWidget {
         String accessToken = data['data']['accessToken'];
         prefs.setString('token', accessToken);
 
+        // Kiểm tra thông tin người dùng với access token
         final verifyResponse = await http.get(
             Uri.parse('https://meal-mentor.uydev.id.vn/api/Account/me'),
             headers: {
@@ -58,38 +59,53 @@ class LoginScreen extends StatelessWidget {
             });
 
         if (verifyResponse.statusCode == 200) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
           var verifyData = jsonDecode(verifyResponse.body);
-          prefs.setString('userId', verifyData['data']['info']['id']);
-          prefs.setString('username', verifyData['data']['info']['username']);
-          prefs.setString('email', verifyData['data']['info']['email']);
-          String recipeListString =
-              verifyData['data']['info']['recipeList'] ?? '[]';
-          List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
-          List<String> recipeList =
-              recipeListDynamic.map((item) => item.toString()).toList();
-          prefs.setStringList('recipeList', recipeList);
-          Navigator.of(context).pop();
-          Fluttertoast.showToast(
-            msg: "Đăng nhập thành công!",
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => NavigationMenu()),
-          );
+
+          // Lưu trữ thông tin người dùng vào SharedPreferences
+          if (verifyData['isSuccess'] == true) {
+            prefs.setString('userId', verifyData['data']['id']);
+            prefs.setString('username', verifyData['data']['username']);
+            prefs.setString('email', verifyData['data']['email']);
+            // Xử lý recipeList, nếu có
+            String recipeListString = verifyData['data']['recipeList'] ?? '[]';
+            List<dynamic> recipeListDynamic = jsonDecode(recipeListString);
+            List<String> recipeList =
+                recipeListDynamic.map((item) => item.toString()).toList();
+            prefs.setStringList('recipeList', recipeList);
+            Navigator.of(context).pop(); // Đóng dialog loading
+
+            Fluttertoast.showToast(
+              msg: "Đăng nhập thành công!",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.TOP,
+              timeInSecForIosWeb: 1,
+              backgroundColor: Colors.green,
+              textColor: Colors.white,
+              fontSize: 16.0,
+            );
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NavigationMenu()),
+            );
+          } else {
+            // Nếu verify không thành công
+            Navigator.of(context).pop(); // Đóng dialog loading
+            _showDialog(context, "Đăng nhập thất bại",
+                "Không thể lấy thông tin người dùng.");
+          }
+        } else {
+          Navigator.of(context).pop(); // Đóng dialog loading
+          _showDialog(context, "Đăng nhập thất bại",
+              "Vui lòng kiểm tra lại thông tin đăng nhập.");
         }
       } else {
-        Navigator.of(context).pop();
+        Navigator.of(context).pop(); // Đóng dialog loading
         _showDialog(context, "Đăng nhập thất bại",
             "Vui lòng kiểm tra lại thông tin đăng nhập.");
       }
     } catch (e) {
+      Navigator.of(context).pop(); // Đóng dialog loading
       _showDialog(context, "Lỗi", "Không thể kết nối đến máy chủ.");
     }
   }
@@ -296,23 +312,27 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Hàm tạo TextField với TextEditingController
+  // TextField cho Form
   Widget _buildTextField(
-      String labelText, TextEditingController controller, bool isPassword) {
+      String labelText, TextEditingController controller, bool obscureText) {
     return TextField(
       controller: controller,
-      obscureText: isPassword,
+      obscureText: obscureText,
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: labelText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-        ),
+        labelStyle: const TextStyle(color: Colors.white),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: const Color(0xFF40513B),
+        border: const OutlineInputBorder(
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
       ),
     );
   }
 
+  // BottomSheet Đăng ký
   Widget _buildRegisterSheet(BuildContext context) {
     return DraggableScrollableSheet(
       initialChildSize: 0.8,
@@ -394,66 +414,25 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Bottom Sheet cho phần "Quên mật khẩu"
+  // BottomSheet Quên mật khẩu
   Widget _buildForgotPasswordSheet(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF609966),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-      ),
-      padding: const EdgeInsets.all(20),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Center(
-            child: Container(
-              width: 50,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
+          const Text(
+            'Nhập email của bạn',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          const Center(
-            child: Text(
-              'Quên mật khẩu',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          _buildTextField("Điền email của bạn", TextEditingController(), false),
+          _buildTextField("Email", _registerEmailController, false),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const ChangePasswordScreen()),
-              );
+              // Xử lý gửi yêu cầu quên mật khẩu
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF40513B),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 80),
-            ),
-            child: const Text(
-              'Xác nhận',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-              ),
-            ),
+            child: const Text("Gửi yêu cầu"),
           ),
         ],
       ),

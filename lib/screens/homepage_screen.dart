@@ -225,7 +225,7 @@ class _HomePageScreenState extends State<HomePageScreen>
                 return Padding(
                   padding: const EdgeInsets.only(right: 10),
                   child: _buildRecipeCard(
-                    recipe['name'] ?? 'No Name',
+                    recipe['translatedName'] ?? 'No Name',
                     recipe['createDateTime'] ?? '',
                     recipe['calories'] ?? 0,
                     recipe['likeQuantity'] ?? '0',
