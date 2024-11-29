@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class RecipeDetailPage extends StatelessWidget {
   final Map<String, dynamic> recipe;
@@ -106,6 +108,20 @@ class RecipeDetailPage extends StatelessWidget {
                       style:
                           const TextStyle(fontSize: 16, color: Colors.black87),
                     ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () => _launchURL(recipe['url']),
+                        child: const Text(
+                          "Tìm hiểu thêm",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -136,5 +152,17 @@ class RecipeDetailPage extends StatelessWidget {
         ],
       );
     }).toList();
+  }
+
+  void _launchURL(String? url) async {
+    if (url != null && url.isNotEmpty) {
+      try {
+        await launchUrlString(url);
+      } catch (e) {
+        print("Error launching URL: $e");
+      }
+    } else {
+      print("Invalid URL");
+    }
   }
 }
