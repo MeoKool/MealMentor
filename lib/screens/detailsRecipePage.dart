@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class RecipeDetailPageHome extends StatefulWidget {
   final int recipeId;
@@ -153,6 +155,20 @@ class _RecipeDetailPageState extends State<RecipeDetailPageHome> {
                                 style: const TextStyle(
                                     fontSize: 16, color: Colors.black87),
                               ),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: GestureDetector(
+                                  onTap: () => _launchURL(recipe?['url']),
+                                  child: const Text(
+                                    "Tìm hiểu thêm",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.blue,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -184,5 +200,17 @@ class _RecipeDetailPageState extends State<RecipeDetailPageHome> {
         ],
       );
     }).toList();
+  }
+
+  void _launchURL(String? url) async {
+    if (url != null && url.isNotEmpty) {
+      try {
+        await launchUrlString(url);
+      } catch (e) {
+        print("Error launching URL: $e");
+      }
+    } else {
+      print("Invalid URL");
+    }
   }
 }
